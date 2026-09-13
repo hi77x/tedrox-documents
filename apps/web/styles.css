@@ -270,8 +270,18 @@ a:hover { text-decoration: underline; }
 .download-card img { border-radius: 10px; }
 .download-card .btn { margin-top: auto; }
 
-.faq { display: grid; gap: 12px; max-width: 780px; }
-.faq details {
+.screenshots-grid { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.screenshots figure {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+.screenshots img { display: block; width: 100%; height: auto; }
+.screenshots figcaption { padding: 10px 14px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--border); }
+
+.faq { display: grid; gap: 12px; max-width: 780px; }.faq details {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);

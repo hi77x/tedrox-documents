@@ -3,6 +3,7 @@
 node_modules
 dist
 dist-ssr
+apps/desktop/src-tauri/gen/schemas
 *.local
 .env
 .env.*

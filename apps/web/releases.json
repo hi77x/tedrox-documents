@@ -1,6 +1,22 @@
 {
-  "version": null,
-  "releasedAt": null,
+  "version": "0.1.0",
+  "releasedAt": "2026-09-13T11:30:24Z",
   "repository": "https://github.com/hi77x/tedrox-documents",
-  "assets": []
+  "assets": [
+    {
+      "name": "SHA256SUMS.txt",
+      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/SHA256SUMS.txt",
+      "bytes": 267
+    },
+    {
+      "name": "tdx-doc-linux-x86_64.tar.gz",
+      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/tdx-doc-linux-x86_64.tar.gz",
+      "bytes": 7107514
+    },
+    {
+      "name": "tdx-doc-windows-x86_64.zip",
+      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/tdx-doc-windows-x86_64.zip",
+      "bytes": 7227429
+    }
+  ]
 }

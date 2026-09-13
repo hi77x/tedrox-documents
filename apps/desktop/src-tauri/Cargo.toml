@@ -1,0 +1,31 @@
+[package]
+name = "tedrox-documents-desktop"
+description = "TEDROX Documents desktop shell (Tauri 2)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "tedrox_documents_desktop"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde.workspace = true
+serde_json.workspace = true
+tdx-core.workspace = true
+tdx-jobs.workspace = true
+tdx-pdf.workspace = true
+tdx-image.workspace = true
+tdx-sheet.workspace = true
+tdx-docx.workspace = true
+tdx-convert.workspace = true

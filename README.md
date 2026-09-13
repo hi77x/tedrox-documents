@@ -43,8 +43,8 @@ desktop and Android shells are being built on top of the same core.
 | Rust core (`tdx-*` crates) | Working, tested |
 | CLI `tdx-doc` | Working, tested, packaged |
 | Windows build | Publishing with every release |
+| Desktop shell (Tauri 2) | Working build; engine wired through 15 commands |
 | Linux build | Builds from source; packages on the roadmap |
-| Desktop shell (Tauri) | In development |
 | Android shell | Planned; shared core is ready |
 | Landing page | Live at [documents.tedrox.space](https://documents.tedrox.space) |
 
@@ -72,8 +72,17 @@ Done in 156 ms (48 B in, 5.3 KB out)
   sheet: Sheet1
 ```
 
+### Desktop application
+
+Real screenshots of the running desktop shell (Windows 10, application v0.1.0):
+
 <p align="center">
-  <img src="assets/brand/og-source.svg" alt="TEDROX Documents" width="640">
+  <img src="assets/screenshots/home-en.png" alt="TEDROX Documents home in English" width="640">
+  <img src="assets/screenshots/settings-ru.png" alt="TEDROX Documents settings in Russian" width="640">
+</p>
+
+<p align="center">
+  <img src="assets/brand/og-source.svg" alt="TEDROX Documents" width="560">
 </p>
 
 ## Features

@@ -10,6 +10,7 @@ members = [
     "crates/tdx-archive",
     "crates/tdx-convert",
     "crates/tdx-cli",
+    "apps/desktop/src-tauri",
 ]
 
 [workspace.package]

@@ -125,12 +125,20 @@ pub fn ensure_free_space(path: &Path, expected_bytes: u64) -> Result<()> {
 }
 
 /// Reject paths that escape `base` after normalization (zip-slip protection).
+/// Backslashes are treated as separators on every platform so Windows-style
+/// traversal cannot slip through on Unix.
 pub fn is_safe_relative(relative: &Path) -> bool {
-    if relative.is_absolute() {
+    let text = relative.to_string_lossy();
+    if text.contains(':') {
+        return false;
+    }
+    let unified = text.replace('\\', "/");
+    let path = Path::new(&unified);
+    if path.is_absolute() {
         return false;
     }
     let mut depth: i64 = 0;
-    for component in relative.components() {
+    for component in path.components() {
         match component {
             Component::Normal(_) => depth += 1,
             Component::CurDir => {}
