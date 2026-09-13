@@ -1,27 +1,27 @@
 {
-  "version": "0.1.0",
-  "releasedAt": "2026-09-13T11:30:24Z",
+  "version": "0.1.1",
+  "releasedAt": "2026-09-13T13:04:17Z",
   "repository": "https://github.com/hi77x/tedrox-documents",
   "assets": [
     {
       "name": "SHA256SUMS.txt",
-      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/SHA256SUMS.txt",
-      "bytes": 371
+      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.1/SHA256SUMS.txt",
+      "bytes": 370
     },
     {
       "name": "tdx-doc-linux-x86_64.tar.gz",
-      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/tdx-doc-linux-x86_64.tar.gz",
-      "bytes": 7107514
+      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.1/tdx-doc-linux-x86_64.tar.gz",
+      "bytes": 7111338
     },
     {
       "name": "tdx-doc-windows-x86_64.zip",
-      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/tdx-doc-windows-x86_64.zip",
-      "bytes": 7227429
+      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.1/tdx-doc-windows-x86_64.zip",
+      "bytes": 7234673
     },
     {
-      "name": "TEDROX-Documents_0.1.0_x64-setup.exe",
-      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/TEDROX-Documents_0.1.0_x64-setup.exe",
-      "bytes": 5068411
+      "name": "TEDROX-Documents-0.1.1-x64-setup.exe",
+      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.1/TEDROX-Documents-0.1.1-x64-setup.exe",
+      "bytes": 5063908
     }
   ]
 }
