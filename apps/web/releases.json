@@ -6,7 +6,7 @@
     {
       "name": "SHA256SUMS.txt",
       "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/SHA256SUMS.txt",
-      "bytes": 267
+      "bytes": 371
     },
     {
       "name": "tdx-doc-linux-x86_64.tar.gz",
@@ -17,6 +17,11 @@
       "name": "tdx-doc-windows-x86_64.zip",
       "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/tdx-doc-windows-x86_64.zip",
       "bytes": 7227429
+    },
+    {
+      "name": "TEDROX-Documents_0.1.0_x64-setup.exe",
+      "url": "https://github.com/hi77x/tedrox-documents/releases/download/v0.1.0/TEDROX-Documents_0.1.0_x64-setup.exe",
+      "bytes": 5068411
     }
   ]
 }

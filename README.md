@@ -133,8 +133,9 @@ Capability matrix for the current release — only what is implemented is marked
 
 Grab the latest build from [GitHub Releases](https://github.com/hi77x/tedrox-documents/releases):
 
-- **Windows** — `tdx-doc-windows-x86_64.zip` (portable CLI + desktop build)
-- **Linux** — build from source today; AppImage and `.deb` are on the roadmap
+- **Windows installer** — `TEDROX-Documents_0.1.0_x64-setup.exe` (desktop app, per-user install)
+- **Windows portable** — `tdx-doc-windows-x86_64.zip` (CLI + documents)
+- **Linux** — `tdx-doc-linux-x86_64.tar.gz` (CLI); AppImage and `.deb` are on the roadmap
 - **Android** — shell in development
 - **Source** — `Source code (zip/tar.gz)` on the release page
 

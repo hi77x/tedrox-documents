@@ -94,7 +94,10 @@
     if (manifest?.version) {
       if (versionLabel) versionLabel.textContent = manifest.version;
       const windowsLink = document.querySelector('[data-download="windows"]');
-      const asset = (manifest.assets || []).find((item) => /windows.*\.zip$/i.test(item.name));
+      const assets = manifest.assets || [];
+      const installer = assets.find((item) => /setup\.exe$/i.test(item.name));
+      const portable = assets.find((item) => /windows.*\.zip$/i.test(item.name));
+      const asset = installer || portable;
       if (windowsLink && asset?.url) windowsLink.href = asset.url;
     } else if (versionLabel) {
       versionLabel.textContent = "0.1.x";
