@@ -8,14 +8,14 @@ here, treat it as unsupported until a release note says otherwise.
 | Format | Open | Edit | Convert | Merge/Split | Batch | Engine |
 | --- | --- | --- | --- | --- | --- | --- |
 | PDF | Yes | Metadata | Yes | Yes | Yes | lopdf (MIT) |
-| DOCX | Yes | Create | Yes | — | — | native OOXML |
+| DOCX | Yes | Yes (editor) | Yes | — | — | native OOXML |
 | DOC (legacy) | Adapter | — | Adapter | — | — | LibreOffice |
 | Markdown | Yes | Yes | Yes | — | — | native |
 | TXT | Yes | Yes | Yes | — | — | native |
 | HTML | Yes | — | Yes | — | — | text-first renderer |
 | RTF | Detect | — | — | — | — | — |
 | CSV / TSV | Yes | Yes | Yes | Split | Yes | csv (MIT) |
-| XLSX | Yes | — | Yes | — | — | calamine + rust_xlsxwriter |
+| XLSX | Yes | Yes (editor) | Yes | — | — | calamine + rust_xlsxwriter |
 | XLS (legacy) | Adapter | — | Adapter | — | — | LibreOffice |
 | ODS | Read | — | — | — | — | calamine |
 | JSON | Yes | — | Yes | — | — | serde_json |
@@ -81,8 +81,15 @@ of pretending.
 
 ## Known limitations
 
+- Document editor: text-level formatting (headings, fonts, bold/italic/
+  underline, colour, alignment, lists). Tables, images and page breaks are on
+  the roadmap; complex layouts from third-party DOCX files are flattened when
+  exported to PDF.
+- Spreadsheet editor: values, formulas created in the editor and cell
+  bold/italic round-trip through XLSX. Formulas that already exist inside
+  third-party files are shown as their cached values because the reader does
+  not expose formula text.
 - Text-first HTML rendering ignores CSS layout, images and scripts by design.
-- DOCX → PDF preserves text structure but not complex layout or images.
 - Font subsetting is not implemented; documents that embed a system font grow
   by roughly 1–2 MB until it lands.
 - 7z, TAR and GZ are detected but not processed.
