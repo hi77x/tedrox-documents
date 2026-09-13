@@ -69,7 +69,7 @@ jobs:
         run: node scripts/license-audit.mjs
       - name: Check generated files are committed
         run: |
-          if ! git diff --quiet -- packages/i18n apps/web/i18n apps/desktop/src/i18n THIRD_PARTY_LICENSES.md; then
+          if ! git diff --quiet -- packages/i18n apps/web/i18n apps/web/en.json apps/web/ru.json apps/desktop/src/i18n THIRD_PARTY_LICENSES.md; then
             echo "Generated files are out of date. Run the scripts and commit the result." >&2
             git diff --stat
             exit 1

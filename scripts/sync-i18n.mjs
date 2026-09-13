@@ -22,6 +22,15 @@ for (const target of targets) {
   }
 }
 
+// Tedrox static hosting flattens nested directories, so the landing fetches
+// dictionaries from its own root. GitHub Pages serves the same files.
+for (const language of languages) {
+  await writeFile(
+    join(root, "apps", "web", `${language}.json`),
+    `${JSON.stringify(dictionaries[language], null, 2)}\n`,
+  );
+}
+
 const english = Object.keys(dictionaries.en).sort();
 const problems = [];
 for (const language of languages) {

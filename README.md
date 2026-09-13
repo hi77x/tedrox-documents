@@ -46,7 +46,7 @@ desktop and Android shells are being built on top of the same core.
 | Desktop shell (Tauri 2) | Working build; engine wired through 15 commands |
 | Linux build | Builds from source; packages on the roadmap |
 | Android shell | Planned; shared core is ready |
-| Landing page | Live at [documents.tedrox.space](https://documents.tedrox.space) |
+| Landing page | Live at [tedrot3u.tedrox.space](https://tedrot3u.tedrox.space); custom domain `documents.tedrox.space` pending DNS |
 
 ## Demo
 

@@ -19,7 +19,7 @@
 
   async function loadDictionary(lang) {
     if (dictionaries[lang]) return dictionaries[lang];
-    const response = await fetch(`i18n/${lang}.json`, { cache: "no-cache" });
+    const response = await fetch(`${lang}.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`i18n ${lang}: ${response.status}`);
     dictionaries[lang] = await response.json();
     return dictionaries[lang];
