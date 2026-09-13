@@ -30,7 +30,9 @@ public class TdxWin32 {
 }
 "@
 
-$proc = Start-Process -FilePath $Exe -ArgumentList $AppArgs -PassThru
+$startParams = @{ FilePath = $Exe; PassThru = $true }
+if ($AppArgs -ne "") { $startParams.ArgumentList = $AppArgs }
+$proc = Start-Process @startParams
 $deadline = (Get-Date).AddSeconds($WaitSeconds)
 while ((Get-Date) -lt $deadline) {
     Start-Sleep -Milliseconds 500
