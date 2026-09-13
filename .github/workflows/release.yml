@@ -27,7 +27,7 @@ jobs:
           $stage = "dist/tdx-doc-windows-x86_64"
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
           Copy-Item target/release/tdx-doc.exe $stage/
-          Copy-Item LICENSE README.md THIRD_PARTY_LICENSES.md $stage/
+          Copy-Item -Path LICENSE, README.md, THIRD_PARTY_LICENSES.md -Destination $stage
           Compress-Archive -Path "$stage/*" -DestinationPath dist/tdx-doc-windows-x86_64.zip
       - name: Checksums
         shell: pwsh
