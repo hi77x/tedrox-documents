@@ -26,8 +26,20 @@ Artifacts land in `dist/`:
 
 ## Running without installation
 
-The ZIP is portable: unpack anywhere and run `tdx-doc.exe` from a terminal or
-call it from scripts. No registry writes, no services.
+The ZIP is portable: unpack anywhere and run `tdx-doc.exe` from PowerShell or
+Windows Terminal. No registry writes, no services.
+
+`tdx-doc.exe` is a command-line tool. Double-clicking it in Explorer shows the
+usage summary and waits for Enter so the window stays open; actual work happens
+through commands:
+
+```powershell
+.\tdx-doc.exe tools
+.\tdx-doc.exe pdf merge a.pdf b.pdf -o merged.pdf
+```
+
+For the desktop application, install
+`TEDROX-Documents-<version>-x64-setup.exe` from the release page instead.
 
 ## SmartScreen
 

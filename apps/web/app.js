@@ -93,12 +93,13 @@
     const versionLabel = document.getElementById("release-version");
     if (manifest?.version) {
       if (versionLabel) versionLabel.textContent = manifest.version;
-      const windowsLink = document.querySelector('[data-download="windows"]');
       const assets = manifest.assets || [];
       const installer = assets.find((item) => /setup\.exe$/i.test(item.name));
       const portable = assets.find((item) => /windows.*\.zip$/i.test(item.name));
-      const asset = installer || portable;
-      if (windowsLink && asset?.url) windowsLink.href = asset.url;
+      const windowsLink = document.querySelector('[data-download="windows"]');
+      const windowsCliLink = document.querySelector('[data-download="windows-cli"]');
+      if (windowsLink && (installer || portable)) windowsLink.href = (installer || portable).url;
+      if (windowsCliLink && portable) windowsCliLink.href = portable.url;
     } else if (versionLabel) {
       versionLabel.textContent = "0.1.x";
     }

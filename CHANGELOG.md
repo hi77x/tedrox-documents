@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] — 2026-09-13
+
+### Added
+
+- CI now builds and publishes the Windows NSIS installer
+  (`TEDROX-Documents-0.1.1-x64-setup.exe`) with the desktop application.
+- The landing page and README clearly separate the desktop installer from the
+  portable command line tool.
+
+### Fixed
+
+- `tdx-doc.exe` launched without arguments (for example by double-clicking the
+  file) now explains that it is a command line tool and waits for Enter instead
+  of closing the window immediately.
+
 ## [0.1.0] — 2026-09-13
 
 First public milestone. The native engine and CLI are complete; desktop and

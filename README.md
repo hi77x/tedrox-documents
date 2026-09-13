@@ -133,14 +133,15 @@ Capability matrix for the current release — only what is implemented is marked
 
 Grab the latest build from [GitHub Releases](https://github.com/hi77x/tedrox-documents/releases):
 
-- **Windows installer** — `TEDROX-Documents_0.1.0_x64-setup.exe` (desktop app, per-user install)
-- **Windows portable** — `tdx-doc-windows-x86_64.zip` (CLI + documents)
-- **Linux** — `tdx-doc-linux-x86_64.tar.gz` (CLI); AppImage and `.deb` are on the roadmap
+- **Windows desktop app** — `TEDROX-Documents-0.1.1-x64-setup.exe` (installer with Start menu entry and uninstaller)
+- **Windows command line** — `tdx-doc-windows-x86_64.zip` (portable `tdx-doc.exe`; run it from PowerShell or Windows Terminal)
+- **Linux CLI** — `tdx-doc-linux-x86_64.tar.gz`; AppImage and `.deb` are on the roadmap
 - **Android** — shell in development
 - **Source** — `Source code (zip/tar.gz)` on the release page
 
 Every release includes `SHA256SUMS.txt`. Code signing is not configured yet, so
-Windows SmartScreen may warn on first run.
+Windows SmartScreen may warn on first run. Double-clicking `tdx-doc.exe` shows
+usage instructions instead of silently closing.
 
 ## Quick start
 

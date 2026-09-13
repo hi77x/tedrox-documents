@@ -554,6 +554,10 @@ struct ToolsArgs {
 }
 
 fn main() -> ExitCode {
+    if std::env::args_os().len() == 1 {
+        welcome();
+        return ExitCode::SUCCESS;
+    }
     let cli = Cli::parse();
     let format = if cli.json {
         OutputFormat::Json
@@ -591,6 +595,28 @@ fn main() -> ExitCode {
             }
         }
     }
+}
+
+/// Friendly output when the executable is launched without arguments
+/// (typically a double-click from Explorer). Keeps the window open so the
+/// message stays readable.
+fn welcome() {
+    println!("TEDROX Documents {} — command line tool", tdx_core::VERSION);
+    println!("Your document toolbox. Offline. Fast. Open.");
+    println!();
+    println!("This is a command-line program. Open PowerShell or Windows Terminal and run:");
+    println!();
+    println!("  tdx-doc tools                       list every operation");
+    println!("  tdx-doc pdf merge a.pdf b.pdf -o merged.pdf");
+    println!("  tdx-doc convert notes.md -o notes.pdf");
+    println!("  tdx-doc csv to-xlsx data.csv -o data.xlsx");
+    println!();
+    println!("Looking for the desktop application? Install TEDROX-Documents-*-x64-setup.exe");
+    println!("from https://github.com/hi77x/tedrox-documents/releases");
+    println!();
+    println!("Это консольная утилита: запускайте её из PowerShell или терминала.");
+    println!("Нажмите Enter, чтобы закрыть это окно.");
+    let _ = std::io::stdin().read_line(&mut String::new());
 }
 
 pub(crate) fn run_and_report(

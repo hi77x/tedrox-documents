@@ -269,6 +269,14 @@ a:hover { text-decoration: underline; }
 .download-card { display: flex; flex-direction: column; gap: 12px; }
 .download-card img { border-radius: 10px; }
 .download-card .btn { margin-top: auto; }
+.cli-hint {
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  font-size: 0.8rem !important;
+  line-height: 1.5;
+}
+.cli-hint a { display: inline-block; margin-top: 4px; font-weight: 600; }
 
 .screenshots-grid { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
 .screenshots figure {

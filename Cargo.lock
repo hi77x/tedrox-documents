@@ -5264,7 +5264,7 @@ dependencies = [
 
 [[package]]
 name = "tdx-archive"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "flate2",
  "serde",
@@ -5277,7 +5277,7 @@ dependencies = [
 
 [[package]]
 name = "tdx-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap 4.6.6",
@@ -5297,7 +5297,7 @@ dependencies = [
 
 [[package]]
 name = "tdx-convert"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "image 0.25.10",
  "printpdf",
@@ -5314,7 +5314,7 @@ dependencies = [
 
 [[package]]
 name = "tdx-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "fs4",
@@ -5329,7 +5329,7 @@ dependencies = [
 
 [[package]]
 name = "tdx-docx"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "flate2",
@@ -5343,7 +5343,7 @@ dependencies = [
 
 [[package]]
 name = "tdx-image"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64 0.23.1",
  "image 0.25.10",
@@ -5358,7 +5358,7 @@ dependencies = [
 
 [[package]]
 name = "tdx-jobs"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -5369,7 +5369,7 @@ dependencies = [
 
 [[package]]
 name = "tdx-pdf"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "flate2",
  "image 0.25.10",
@@ -5383,7 +5383,7 @@ dependencies = [
 
 [[package]]
 name = "tdx-sheet"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "calamine",
  "chardetng",
@@ -5400,7 +5400,7 @@ dependencies = [
 
 [[package]]
 name = "tedrox-documents-desktop"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
