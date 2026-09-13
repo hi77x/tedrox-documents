@@ -4,6 +4,8 @@
 //! text, headings and simple inline formatting. Unsupported OOXML parts are
 //! preserved on disk: this crate never rewrites an existing file in place.
 
+pub mod model;
+
 use std::io::{Cursor, Read, Write};
 use std::path::Path;
 
@@ -53,7 +55,7 @@ struct Run {
     italic: bool,
 }
 
-fn xml_escape(value: &str) -> String {
+pub(crate) fn xml_escape(value: &str) -> String {
     let mut out = String::with_capacity(value.len());
     for ch in value.chars() {
         match ch {
@@ -68,7 +70,7 @@ fn xml_escape(value: &str) -> String {
     out
 }
 
-fn xml_unescape(value: &str) -> String {
+pub(crate) fn xml_unescape(value: &str) -> String {
     value
         .replace("&lt;", "<")
         .replace("&gt;", ">")
@@ -292,7 +294,7 @@ const DOCUMENT_RELS: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>"#;
 
 const STYLES_XML: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style><w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:sz w:val="36"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:pPr><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="30"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:pPr><w:outlineLvl w:val="2"/></w:pPr><w:rPr><w:b/><w:sz w:val="26"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="ListParagraph"><w:name w:val="List Paragraph"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:left="720"/></w:pPr></w:style></w:styles>"#;
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style><w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:sz w:val="36"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:pPr><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="30"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:pPr><w:outlineLvl w:val="2"/></w:pPr><w:rPr><w:b/><w:sz w:val="26"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="ListParagraph"><w:name w:val="List Paragraph"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:left="720"/></w:pPr><w:style w:type="paragraph" w:styleId="Quote"><w:name w:val="Quote"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:left="720" w:right="720"/></w:pPr><w:rPr><w:i/><w:color w:val="595959"/></w:rPr></w:style></w:styles>"#;
 
 fn core_xml(options: &DocxOptions) -> String {
     let now = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
@@ -314,11 +316,21 @@ const APP_XML: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
 fn build_package(blocks: &[Block], options: &DocxOptions) -> Result<Vec<u8>> {
     let body: String = blocks.iter().map(block_xml).collect();
-    let document = format!(
+    let document = wrap_document(&body);
+    build_package_from_document(&document, options)
+}
+
+pub(crate) fn wrap_document(body: &str) -> String {
+    format!(
         r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>{body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr></w:body></w:document>"#
-    );
+    )
+}
 
+pub(crate) fn build_package_from_document(
+    document: &str,
+    options: &DocxOptions,
+) -> Result<Vec<u8>> {
     let mut buffer = Cursor::new(Vec::new());
     {
         let mut writer = zip::ZipWriter::new(&mut buffer);
@@ -335,7 +347,7 @@ fn build_package(blocks: &[Block], options: &DocxOptions) -> Result<Vec<u8>> {
         };
         write("[Content_Types].xml", CONTENT_TYPES, options_deflate)?;
         write("_rels/.rels", ROOT_RELS, options_deflate)?;
-        write("word/document.xml", &document, options_deflate)?;
+        write("word/document.xml", document, options_deflate)?;
         write("word/styles.xml", STYLES_XML, options_deflate)?;
         write(
             "word/_rels/document.xml.rels",
@@ -352,7 +364,7 @@ fn build_package(blocks: &[Block], options: &DocxOptions) -> Result<Vec<u8>> {
     Ok(buffer.into_inner())
 }
 
-fn document_xml(input: &Path) -> Result<String> {
+pub(crate) fn document_xml(input: &Path) -> Result<String> {
     let file = std::fs::File::open(input).map_err(|err| match err.kind() {
         std::io::ErrorKind::NotFound => TdxError::not_found(input),
         _ => TdxError::Io(err),
@@ -369,7 +381,7 @@ fn document_xml(input: &Path) -> Result<String> {
     Ok(text)
 }
 
-fn xml_attr(tag: &str, name: &str) -> Option<String> {
+pub(crate) fn xml_attr(tag: &str, name: &str) -> Option<String> {
     let needle = format!("{name}=\"");
     let start = tag.find(&needle)? + needle.len();
     let end = tag[start..].find('"')? + start;

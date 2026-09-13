@@ -7,6 +7,7 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 use tauri::ipc::Channel;
+use tauri::{Emitter, Manager};
 use tdx_core::{
     error::TdxError,
     progress::{CancelToken, ProgressSink, Stage},
@@ -530,14 +531,62 @@ async fn convert_auto(
     .map_err(|err| err.to_string())?
 }
 
+#[tauri::command]
+async fn docx_open(path: String) -> Result<serde_json::Value, String> {
+    let model =
+        tdx_docx::model::load_model(std::path::Path::new(&path)).map_err(|err| err.to_string())?;
+    serde_json::to_value(model).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+async fn docx_save(path: String, model: serde_json::Value) -> Result<serde_json::Value, String> {
+    let model: tdx_docx::model::DocModel =
+        serde_json::from_value(model).map_err(|err| err.to_string())?;
+    tdx_docx::model::save_model(&model, std::path::Path::new(&path))
+        .map_err(|err| err.to_string())?;
+    Ok(serde_json::json!({ "path": path }))
+}
+
+#[tauri::command]
+async fn sheet_open(path: String) -> Result<serde_json::Value, String> {
+    let model = tdx_sheet::model::load_workbook(std::path::Path::new(&path))
+        .map_err(|err| err.to_string())?;
+    serde_json::to_value(model).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+async fn sheet_save(path: String, model: serde_json::Value) -> Result<serde_json::Value, String> {
+    let model: tdx_sheet::model::WorkbookModel =
+        serde_json::from_value(model).map_err(|err| err.to_string())?;
+    tdx_sheet::model::save_workbook(&model, std::path::Path::new(&path))
+        .map_err(|err| err.to_string())?;
+    Ok(serde_json::json!({ "path": path }))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            if let Some(path) = std::env::args().nth(1) {
+                if std::path::Path::new(&path).is_file() {
+                    let window = app.get_webview_window("main").expect("main window exists");
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_millis(1200));
+                        let _ = window.emit("open-file", path);
+                    });
+                }
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             inspect_files,
             list_tools,
             suggest_output,
+            docx_open,
+            docx_save,
+            sheet_open,
+            sheet_save,
             pdf_merge,
             pdf_split,
             pdf_extract,

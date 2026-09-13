@@ -4,7 +4,11 @@ param(
     [string]$Out = "assets\screenshots\home.png",
     [int]$WaitSeconds = 10,
     [int]$ClickX = -1,
-    [int]$ClickY = -1
+    [int]$ClickY = -1,
+    [int]$Click2X = -1,
+    [int]$Click2Y = -1,
+    [string]$TypeText = "",
+    [string]$AppArgs = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -26,7 +30,7 @@ public class TdxWin32 {
 }
 "@
 
-$proc = Start-Process -FilePath $Exe -PassThru
+$proc = Start-Process -FilePath $Exe -ArgumentList $AppArgs -PassThru
 $deadline = (Get-Date).AddSeconds($WaitSeconds)
 while ((Get-Date) -lt $deadline) {
     Start-Sleep -Milliseconds 500
@@ -39,19 +43,35 @@ if ($hwnd -eq 0) { $proc.Kill(); throw "The application window did not appear." 
 
 [void][TdxWin32]::ShowWindow($hwnd, 5)
 [void][TdxWin32]::SetForegroundWindow($hwnd)
-Start-Sleep -Seconds 4
+Start-Sleep -Seconds 8
 
-if ($ClickX -ge 0 -and $ClickY -ge 0) {
+function Send-Click([int]$offsetX, [int]$offsetY) {
     $rect = New-Object TdxWin32+RECT
     [void][TdxWin32]::GetWindowRect($hwnd, [ref]$rect)
     $point = New-Object TdxWin32+POINT
-    $point.X = $rect.Left + $ClickX
-    $point.Y = $rect.Top + $ClickY
+    $point.X = $rect.Left + $offsetX
+    $point.Y = $rect.Top + $offsetY
     [void][TdxWin32]::ScreenToClient($hwnd, [ref]$point)
     $lparam = (($point.Y -shl 16) -bor ($point.X -band 0xFFFF))
     [void][TdxWin32]::PostMessage($hwnd, 0x0201, [IntPtr]1, [IntPtr]$lparam)
-    Start-Sleep -Milliseconds 150
+    Start-Sleep -Milliseconds 120
     [void][TdxWin32]::PostMessage($hwnd, 0x0202, [IntPtr]0, [IntPtr]$lparam)
+    Start-Sleep -Seconds 1
+}
+
+if ($ClickX -ge 0 -and $ClickY -ge 0) {
+    Send-Click $ClickX $ClickY
+}
+
+if ($Click2X -ge 0 -and $Click2Y -ge 0) {
+    Send-Click $Click2X $Click2Y
+}
+
+if ($TypeText -ne "") {
+    Add-Type -AssemblyName System.Windows.Forms
+    [void][TdxWin32]::SetForegroundWindow($hwnd)
+    Start-Sleep -Milliseconds 400
+    [System.Windows.Forms.SendKeys]::SendWait($TypeText)
     Start-Sleep -Seconds 2
 }
 

@@ -1,6 +1,7 @@
 //! Spreadsheet and CSV workbench for TEDROX Documents.
 
 pub mod csv_ops;
+pub mod model;
 pub mod xlsx_ops;
 
 use std::path::Path;

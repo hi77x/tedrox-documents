@@ -27,14 +27,14 @@
 
 ## What it is
 
-TEDROX Documents replaces the fragmented workflow of a PDF editor, a converter
-website and a set of small office utilities with one native application built on
-a shared Rust core. Everything runs locally: no uploads, no account, no queues,
-no "free tier" limits.
+TEDROX Documents is your local office workbench: create and edit documents and
+spreadsheets, merge and clean PDFs, convert files, all in one native
+application built on a shared Rust core. Everything runs locally: no uploads,
+no account, no queues, no "free tier" limits.
 
 The project is under active development. This repository already contains the
-complete native engine, a scriptable CLI and automated release pipelines; the
-desktop and Android shells are being built on top of the same core.
+complete native engine, a scriptable CLI, the Windows desktop application and
+automated release pipelines; the Android shell will reuse the same core.
 
 ## Status
 
@@ -43,7 +43,7 @@ desktop and Android shells are being built on top of the same core.
 | Rust core (`tdx-*` crates) | Working, tested |
 | CLI `tdx-doc` | Working, tested, packaged |
 | Windows build | Publishing with every release |
-| Desktop shell (Tauri 2) | Working build; engine wired through 15 commands |
+| Desktop app (Tauri 2) | Document editor, spreadsheet editor, PDF/image/convert tools |
 | Linux build | Builds from source; packages on the roadmap |
 | Android shell | Planned; shared core is ready |
 | Landing page | Live at [tedrot3u.tedrox.space](https://tedrot3u.tedrox.space); custom domain `documents.tedrox.space` pending DNS |
@@ -74,11 +74,14 @@ Done in 156 ms (48 B in, 5.3 KB out)
 
 ### Desktop application
 
-Real screenshots of the running desktop shell (Windows 10, application v0.1.0):
+Real screenshots of the running application (Windows 10, v0.2.0): the start
+screen, the DOCX document editor and the XLSX/CSV spreadsheet editor with live
+formulas.
 
 <p align="center">
-  <img src="assets/screenshots/home-en.png" alt="TEDROX Documents home in English" width="640">
-  <img src="assets/screenshots/settings-ru.png" alt="TEDROX Documents settings in Russian" width="640">
+  <img src="assets/screenshots/v2-home.png" alt="TEDROX Documents start screen" width="640">
+  <img src="assets/screenshots/v2-document.png" alt="Document editor with headings, bold text and lists" width="640">
+  <img src="assets/screenshots/v2-spreadsheet.png" alt="Spreadsheet editor with data and live formulas" width="640">
 </p>
 
 <p align="center">
@@ -94,15 +97,20 @@ images → PDF · metadata viewer · metadata editor · privacy clean (Info, XMP
 JavaScript, embedded files, actions) · image re-compression presets ·
 text watermark.
 
-**Documents**
-Markdown/txt → DOCX (native OOXML writer) · DOCX text and Markdown extraction ·
-DOCX → PDF · HTML → PDF · Markdown → HTML · document statistics.
-Legacy binary `.doc` import through the optional LibreOffice adapter.
+**Documents (editor)**
+Create DOCX documents in the desktop app with a ribbon toolbar: headings, font
+family and size, bold, italic, underline, text color, alignment, bullet and
+numbered lists and quotes. Documents round-trip through real OOXML and export
+to PDF. The CLI adds Markdown/txt → DOCX, DOCX text/Markdown extraction and
+HTML → PDF. Legacy binary `.doc` import through the optional LibreOffice
+adapter.
 
-**Spreadsheets and CSV**
-CSV report with delimiter, encoding and type detection · CSV ↔ XLSX ↔ JSON ·
-filter · sort · deduplicate · trim · select and rename columns · split by rows
-or by field · join files · XLSX/XLS/ODS reading with sheet listing.
+**Spreadsheets (editor) and CSV**
+Edit XLSX, CSV, TSV and ODS in the desktop app: formula bar, keyboard
+navigation, cell formatting, and a formula engine (SUM, AVERAGE, MIN, MAX,
+COUNT, ABS, ROUND, references, ranges, arithmetic). The CLI offers a full CSV
+workbench: delimiter and encoding detection, CSV ↔ XLSX ↔ JSON, filter, sort,
+deduplicate, trim, select and rename columns, split and join.
 
 **Images**
 PNG, JPEG, WebP, BMP, TIFF, AVIF conversion · resize (contain/cover/exact) ·
@@ -120,11 +128,11 @@ Capability matrix for the current release — only what is implemented is marked
 | Format | Open | Edit | Convert | Merge/Split | Notes |
 | --- | --- | --- | --- | --- | --- |
 | PDF | Yes | Metadata | Yes | Yes | Page rasterization needs the optional PDFium adapter |
-| DOCX | Yes | Create | Yes | — | Native OOXML; complex layout is flattened in PDF export |
+| DOCX | Yes | Yes | Yes | — | Editor with formatting; complex layout is flattened in PDF export |
 | Markdown / TXT | Yes | Yes | Yes | — | PDF export with system font embedding |
 | HTML | Yes | — | Yes | — | Text-first rendering; scripts and CSS layout ignored |
-| CSV / TSV | Yes | Yes | Yes | Split | Streaming parser, encoding detection |
-| XLSX / XLS / ODS | Yes | — | XLSX → CSV | — | Reading via calamine; writing via rust_xlsxwriter |
+| CSV / TSV | Yes | Yes | Yes | Split | Editor with formulas; streaming CLI parser with encoding detection |
+| XLSX / ODS | Yes | Yes | Yes | — | Editor with formulas; XLS import via LibreOffice |
 | Images | Yes | Yes | Yes | — | SVG tracing is for logos and line art, not photos |
 | ZIP | Yes | — | — | — | Safe extraction with limits |
 | DOC / XLS (legacy) | Adapter | — | Adapter | — | Requires LibreOffice installed by the user |
@@ -191,7 +199,7 @@ Add `--json` to any command for machine-readable output.
 A shared Rust core with thin shells on top:
 
 ```text
-apps/desktop (in development)     apps/web (landing)
+ apps/desktop (Tauri 2 shell)      apps/web (landing)
         │                               │
 crates/tdx-cli (tdx-doc) ── crates/tdx-convert
         │                        │
@@ -235,7 +243,8 @@ key must exist in Russian with no orphans. See
 
 ## Roadmap
 
-- Desktop shell (Tauri 2) with the same operation registry
+- Tables, page breaks and images inside the document editor
+- Multiple sheets, number formats and charts in the spreadsheet editor
 - Linux AppImage and `.deb` packages
 - Android shell with Storage Access Framework
 - PDF page rasterization through the optional PDFium adapter

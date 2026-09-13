@@ -242,15 +242,15 @@ fn header_heuristic(records: &[Vec<String>]) -> bool {
     !first_has_numbers && second_has_numbers && unique_ok
 }
 
-struct Session {
-    reader: csv::Reader<File>,
+pub(crate) struct Session {
+    pub(crate) reader: csv::Reader<File>,
     delimiter: char,
     has_header: bool,
     encoding: String,
     _input: PreparedInput,
 }
 
-fn open_session(path: &Path, options: &CsvOptions) -> Result<Session> {
+pub(crate) fn open_session(path: &Path, options: &CsvOptions) -> Result<Session> {
     let input = prepare_input(path)?;
     let sample = read_sample(&input.path, 128 * 1024)?;
     let sample_text = String::from_utf8_lossy(&sample);

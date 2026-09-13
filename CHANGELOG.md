@@ -4,6 +4,31 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] — 2026-09-13
+
+### Added
+
+- **Document editor** for DOCX with a ribbon toolbar: headings, font family and
+  size, bold, italic, underline, text color, alignment, bullet and numbered
+  lists, quotes, undo and redo. Documents save as real OOXML with formatting
+  preserved, and export to PDF in one click.
+- **Spreadsheet editor** for XLSX, CSV, TSV and ODS with a formula bar, keyboard
+  navigation and a formula engine (SUM, AVERAGE, MIN, MAX, COUNT, ABS, ROUND,
+  cell references, ranges, arithmetic). Cells can be bold or italic; saving
+  writes XLSX or CSV.
+- Office-style start screen: New document, New spreadsheet, Open file and a
+  recent files list.
+- Files passed as a launch argument are opened automatically, and Markdown/TXT
+  files import into the document editor.
+- `tdx-docx::model` and `tdx-sheet::model` in the core with round-trip tests.
+
+### Changed
+
+- The desktop shell navigation is now organized around creation and editing
+  (Home, Document, Spreadsheet) with PDF, Images and Convert as tool sections.
+- Fresh screenshots of the running application are included in the README and
+  on the landing page.
+
 ## [0.1.1] — 2026-09-13
 
 ### Added
