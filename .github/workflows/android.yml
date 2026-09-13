@@ -1,0 +1,29 @@
+name: Android (experimental)
+
+# The Android shell does not exist yet. This workflow verifies that the shared
+# core cross-compiles for Android targets so the port can proceed on a stable
+# foundation. It is manual-only until an actual APK pipeline exists.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cross-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi
+      - uses: Swatinem/rust-cache@v2
+      - name: Cross-check core crates
+        run: |
+          cargo check -p tdx-core -p tdx-jobs -p tdx-sheet --target aarch64-linux-android
+      - name: Note
+        run: echo "Core cross-compiles. Kotlin shell and UniFFI bindings are on the roadmap."

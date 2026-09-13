@@ -1,0 +1,13 @@
+{
+  "name": "TEDROX Documents",
+  "short_name": "TEDROX Docs",
+  "description": "Local-first document toolbox: PDF, Office, CSV, images and conversions.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

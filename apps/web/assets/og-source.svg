@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="TEDROX Documents — local-first document toolbox">
+  <rect width="1200" height="630" fill="#0f1115"/>
+  <rect x="0" y="0" width="1200" height="6" fill="#3a7afe"/>
+  <g transform="translate(96 96) scale(0.5)">
+    <rect width="512" height="512" rx="112" fill="#171a21"/>
+    <path d="M150 96h156l96 96v224a32 32 0 0 1-32 32H150a32 32 0 0 1-32-32V128a32 32 0 0 1 32-32z" fill="#f4f5f7"/>
+    <path d="M306 96l96 96h-80a16 16 0 0 1-16-16z" fill="#c8ccd4"/>
+    <path d="M180 250h152v20H180z" fill="#0f1115"/>
+    <path d="M180 292h152v20H180z" fill="#0f1115"/>
+    <path d="M180 334h96v20h-96z" fill="#3a7afe"/>
+    <circle cx="368" cy="368" r="56" fill="#3a7afe"/>
+    <path d="M346 368l16 16 30-32" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="390" y="220" font-family="Segoe UI, -apple-system, Helvetica, Arial, sans-serif" font-size="64" font-weight="700" fill="#f4f5f7">TEDROX Documents</text>
+  <text x="390" y="290" font-family="Segoe UI, -apple-system, Helvetica, Arial, sans-serif" font-size="34" fill="#a8adb8">One fast app for documents, PDFs, spreadsheets and conversions.</text>
+  <text x="390" y="350" font-family="Segoe UI, -apple-system, Helvetica, Arial, sans-serif" font-size="34" fill="#a8adb8">Local-first. Offline. Open source (MIT).</text>
+  <g font-family="Segoe UI, -apple-system, Helvetica, Arial, sans-serif" font-size="26" fill="#f4f5f7">
+    <rect x="390" y="410" rx="10" width="190" height="56" fill="#1c2029"/>
+    <text x="414" y="447">PDF</text>
+    <rect x="596" y="410" rx="10" width="230" height="56" fill="#1c2029"/>
+    <text x="620" y="447">Documents</text>
+    <rect x="842" y="410" rx="10" width="240" height="56" fill="#1c2029"/>
+    <text x="866" y="447">Spreadsheets</text>
+    <rect x="390" y="486" rx="10" width="170" height="56" fill="#1c2029"/>
+    <text x="414" y="523">Images</text>
+    <rect x="576" y="486" rx="10" width="200" height="56" fill="#1c2029"/>
+    <text x="600" y="523">Convert</text>
+    <rect x="792" y="486" rx="10" width="150" height="56" fill="#1c2029"/>
+    <text x="816" y="523">Batch</text>
+  </g>
+</svg>

@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  windows:
+    name: Windows artifacts
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build CLI
+        run: cargo build --release -p tdx-cli
+      - name: Stage portable package
+        shell: pwsh
+        run: |
+          $stage = "dist/tdx-doc-windows-x86_64"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item target/release/tdx-doc.exe $stage/
+          Copy-Item LICENSE README.md THIRD_PARTY_LICENSES.md $stage/
+          Compress-Archive -Path "$stage/*" -DestinationPath dist/tdx-doc-windows-x86_64.zip
+      - name: Checksums
+        shell: pwsh
+        run: |
+          $lines = @()
+          $lines += "$((Get-FileHash dist/tdx-doc-windows-x86_64.zip -Algorithm SHA256).Hash.ToLower())  tdx-doc-windows-x86_64.zip"
+          $lines += "$((Get-FileHash dist/tdx-doc-windows-x86_64/tdx-doc.exe -Algorithm SHA256).Hash.ToLower())  tdx-doc.exe"
+          Set-Content -Path dist/SHA256SUMS.txt -Value $lines -Encoding ascii
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-dist
+          path: dist/*
+
+  linux:
+    name: Linux artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build CLI
+        run: cargo build --release -p tdx-cli
+      - name: Stage tarball
+        run: |
+          set -euo pipefail
+          mkdir -p dist/tdx-doc-linux-x86_64
+          cp target/release/tdx-doc dist/tdx-doc-linux-x86_64/
+          cp LICENSE README.md THIRD_PARTY_LICENSES.md dist/tdx-doc-linux-x86_64/
+          tar -C dist -czf dist/tdx-doc-linux-x86_64.tar.gz tdx-doc-linux-x86_64
+          sha256sum dist/tdx-doc-linux-x86_64.tar.gz | sed 's#dist/##' > dist/SHA256SUMS-linux.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-dist
+          path: dist/*
+
+  publish:
+    name: Publish release
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Merge checksums
+        run: |
+          set -euo pipefail
+          cat artifacts/windows-dist/SHA256SUMS.txt artifacts/linux-dist/SHA256SUMS-linux.txt > artifacts/SHA256SUMS.txt
+          ls -la artifacts
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            artifacts/windows-dist/tdx-doc-windows-x86_64.zip
+            artifacts/linux-dist/tdx-doc-linux-x86_64.tar.gz
+            artifacts/SHA256SUMS.txt

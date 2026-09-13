@@ -1,0 +1,17 @@
+[package]
+name = "tdx-jobs"
+description = "Job runtime for TEDROX Documents: queue, lifecycle, cancellation, progress, sanitized errors."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+tdx-core.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+thiserror.workspace = true
+uuid = { workspace = true, features = ["v4", "serde"] }

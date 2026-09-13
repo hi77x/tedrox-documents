@@ -1,0 +1,21 @@
+[package]
+name = "tdx-archive"
+description = "Archive operations for TEDROX Documents: safe ZIP creation and extraction."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+tdx-core.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+walkdir = "2.5.0"
+zip = { version = "4.2.0", default-features = false, features = ["deflate-flate2"] }
+flate2 = "1"
+
+[dev-dependencies]
+tempfile = "3.27.0"

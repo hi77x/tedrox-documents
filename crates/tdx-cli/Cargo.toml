@@ -1,0 +1,30 @@
+[package]
+name = "tdx-cli"
+description = "tdx-doc command line interface for TEDROX Documents."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "tdx-doc"
+path = "src/main.rs"
+
+[dependencies]
+tdx-core.workspace = true
+tdx-jobs.workspace = true
+tdx-pdf.workspace = true
+tdx-image.workspace = true
+tdx-sheet.workspace = true
+tdx-docx.workspace = true
+tdx-archive.workspace = true
+tdx-convert.workspace = true
+anyhow.workspace = true
+clap = { workspace = true, features = ["derive"] }
+serde.workspace = true
+serde_json.workspace = true
+ctrlc = "3.5.2"
+sha2 = "0.10.9"

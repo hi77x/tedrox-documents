@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="meta.title">TEDROX Documents — local-first document toolbox</title>
+  <meta name="description" data-i18n-attr="content:meta.description" content="Process PDFs, documents, spreadsheets, images and conversions locally. Offline. Fast. Open source under the MIT license.">
+  <meta name="theme-color" content="#0f1115">
+  <link rel="canonical" href="https://documents.tedrox.space/">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TEDROX Documents">
+  <meta property="og:description" content="One fast app for documents, PDFs, spreadsheets and conversions — local-first and open source.">
+  <meta property="og:url" content="https://documents.tedrox.space/">
+  <meta property="og:image" content="https://documents.tedrox.space/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="TEDROX Documents">
+  <meta name="twitter:description" content="Local-first document toolbox. PDF, Office, CSV, images and conversions. MIT licensed.">
+  <meta name="twitter:image" content="https://documents.tedrox.space/assets/og.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "TEDROX Documents",
+    "operatingSystem": "Windows, Linux",
+    "applicationCategory": "UtilitiesApplication",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "license": "https://opensource.org/licenses/MIT",
+    "downloadUrl": "https://github.com/hi77x/tedrox-documents/releases",
+    "codeRepository": "https://github.com/hi77x/tedrox-documents"
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="shell header-row">
+      <a class="brand" href="./" aria-label="TEDROX Documents home">
+        <img src="assets/mark.svg" alt="" width="28" height="28">
+        <span>TEDROX Documents</span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="#features" data-i18n="nav.features">Features</a>
+        <a href="#formats" data-i18n="nav.formats">Formats</a>
+        <a href="#privacy" data-i18n="nav.privacy">Privacy</a>
+        <a href="#cli" data-i18n="nav.cli">CLI</a>
+        <a href="#download" data-i18n="nav.download">Download</a>
+        <a href="#faq" data-i18n="nav.faq">FAQ</a>
+      </nav>
+      <div class="header-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-lang="en" class="active">EN</button>
+          <button type="button" data-lang="ru">RU</button>
+        </div>
+        <a class="btn btn-ghost" href="https://github.com/hi77x/tedrox-documents" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero shell">
+      <p class="badge" data-i18n="hero.badge">Local-first · Open source · MIT</p>
+      <h1 data-i18n="hero.title">One app for the files you actually work with.</h1>
+      <p class="lede" data-i18n="hero.subtitle">Edit, convert, merge, inspect and export documents locally — without sending your files to random websites.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#download" data-i18n="hero.download">Download</a>
+        <a class="btn" href="https://github.com/hi77x/tedrox-documents" rel="noopener" data-i18n="hero.github">View on GitHub</a>
+      </div>
+      <ul class="trust-row">
+        <li data-i18n="hero.trust.local">Processed locally</li>
+        <li data-i18n="hero.trust.open">Open source</li>
+        <li data-i18n="hero.trust.mit">MIT licensed</li>
+        <li data-i18n="hero.trust.platforms">Windows · Linux · Android (in progress)</li>
+      </ul>
+    </section>
+
+    <section class="demo shell" aria-labelledby="demo-title">
+      <div class="terminal" role="img" aria-label="Terminal session showing local PDF merging with tdx-doc">
+        <div class="terminal-bar"><span></span><span></span><span></span><em>tdx-doc — local processing</em></div>
+        <pre id="demo-output"><code>$ tdx-doc convert report.md -o report.pdf
+Done in 208 ms (105 B in, 96 KB out)
+
+$ tdx-doc pdf merge report.pdf appendix.pdf -o merged.pdf
+Done in 1.29 s (188 KB in, 191 KB out)
+  pages: 2
+
+$ tdx-doc pdf clean merged.pdf -o clean.pdf
+Done in 962 ms (191 KB in, 190 KB out)
+  removed_entries: 2
+  All processing happened on this machine.</code></pre>
+      </div>
+      <p class="caption" data-i18n="demo.caption">Real output from the tdx-doc CLI. No upload, no account, no queue.</p>
+    </section>
+
+    <section id="features" class="section shell">
+      <h2 data-i18n="features.title">A workbench, not a widget</h2>
+      <p class="section-lede" data-i18n="features.subtitle">Thirty focused tools across five areas, sharing one engine and one job queue.</p>
+      <div class="grid features-grid">
+        <article class="card">
+          <h3 data-i18n="feature.pdf.title">PDF workstation</h3>
+          <p data-i18n="feature.pdf.desc">Merge, split, extract, reorder, rotate and clean PDFs. Compress embedded images, edit metadata, watermark documents and build PDFs from images.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="feature.documents.title">Documents</h3>
+          <p data-i18n="feature.documents.desc">Create and convert DOCX through the native OOXML engine. Markdown, plain text and HTML to PDF with system font embedding.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="feature.sheets.title">Spreadsheets &amp; CSV</h3>
+          <p data-i18n="feature.sheets.desc">A real CSV workbench: delimiter and encoding detection, type inference, filtering, sorting, deduplication, splitting, joining, CSV ↔ XLSX ↔ JSON.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="feature.images.title">Image Lab</h3>
+          <p data-i18n="feature.images.desc">Convert between PNG, JPEG, WebP, BMP, TIFF and AVIF. Resize, crop, rotate, strip metadata, render SVG, trace raster to vector, build ICO icons.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="feature.convert.title">Conversion center</h3>
+          <p data-i18n="feature.convert.desc">One route from input to output with an honest capability registry. Unsupported conversions stay disabled instead of failing silently.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="feature.jobs.title">Job runtime</h3>
+          <p data-i18n="feature.jobs.desc">Every operation runs as a cancellable job with staged progress, bounded concurrency, atomic writes and verified output.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="formats" class="section shell">
+      <h2 data-i18n="formats.title">Supported formats</h2>
+      <div class="grid formats-grid">
+        <article class="card compact">
+          <h3>PDF</h3>
+          <p data-i18n="formats.pdf">Open, inspect, merge, split, extract, delete, reorder, rotate, compress, watermark, metadata, privacy clean, images to PDF.</p>
+        </article>
+        <article class="card compact">
+          <h3 data-i18n="formats.documents.title">Documents</h3>
+          <p data-i18n="formats.documents.desc">DOCX, Markdown, TXT, HTML, RTF inspection. Legacy DOC through the optional LibreOffice adapter.</p>
+        </article>
+        <article class="card compact">
+          <h3 data-i18n="formats.sheets.title">Spreadsheets</h3>
+          <p data-i18n="formats.sheets.desc">CSV, TSV, XLSX, XLS and ODS reading; XLSX writing; CSV ↔ XLSX ↔ JSON conversion.</p>
+        </article>
+        <article class="card compact">
+          <h3 data-i18n="formats.images.title">Images</h3>
+          <p data-i18n="formats.images.desc">PNG, JPEG, WebP, BMP, TIFF, AVIF, GIF, SVG, ICO. SVG rasterization and vector tracing for logos and line art.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="privacy" class="section shell">
+      <h2 data-i18n="privacy.title">Your files stay on your machine</h2>
+      <div class="grid privacy-grid">
+        <div class="privacy-item">
+          <h3 data-i18n="privacy.noUpload.title">No upload</h3>
+          <p data-i18n="privacy.noUpload.desc">Processing happens in the local native core. There is no server component and no account.</p>
+        </div>
+        <div class="privacy-item">
+          <h3 data-i18n="privacy.noTelemetry.title">No telemetry</h3>
+          <p data-i18n="privacy.noTelemetry.desc">No analytics, no crash reporting, no tracking. Logs contain operation metadata only, never document contents.</p>
+        </div>
+        <div class="privacy-item">
+          <h3 data-i18n="privacy.atomic.title">Safe writes</h3>
+          <p data-i18n="privacy.atomic.desc">Outputs are written to a temporary file, flushed, verified and only then moved into place. Source files are never overwritten by default.</p>
+        </div>
+        <div class="privacy-item">
+          <h3 data-i18n="privacy.honest.title">Honest limits</h3>
+          <p data-i18n="privacy.honest.desc">No “lossless 90% compression” promises. PDF rendering to images requires the optional PDFium adapter, and the UI says so.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="cli" class="section shell">
+      <h2 data-i18n="cli.title">Scriptable from day one</h2>
+      <p class="section-lede" data-i18n="cli.subtitle">The same engine that powers the app is available as a command line tool with JSON output and clean exit codes.</p>
+      <pre class="code-block"><code>tdx-doc pdf merge a.pdf b.pdf -o merged.pdf
+tdx-doc pdf split file.pdf --chunk 25 --out-dir out/
+tdx-doc image convert logo.png --to webp -o logo.webp
+tdx-doc image trace logo.png -o logo.svg --preset poster
+tdx-doc csv to-xlsx data.csv -o data.xlsx
+tdx-doc convert notes.md -o notes.pdf
+tdx-doc inspect file.pdf --json
+tdx-doc tools</code></pre>
+      <p class="caption" data-i18n="cli.note">Progress is disabled automatically when the output is piped. Ctrl+C cancels cooperatively.</p>
+    </section>
+
+    <section id="download" class="section shell">
+      <h2 data-i18n="download.title">Download</h2>
+      <p class="section-lede"><span data-i18n="download.subtitle">Builds are published on GitHub Releases. Version</span> <span id="release-version">0.1.x</span>.</p>
+      <div class="grid download-grid">
+        <article class="card download-card">
+          <img src="assets/icon-192.png" alt="" width="44" height="44">
+          <h3>Windows</h3>
+          <p data-i18n="download.windows.desc">Portable ZIP with the tdx-doc CLI and desktop build.</p>
+          <a class="btn btn-primary" data-download="windows" href="https://github.com/hi77x/tedrox-documents/releases" rel="noopener" data-i18n="download.windows.action">Download for Windows</a>
+        </article>
+        <article class="card download-card">
+          <img src="assets/icon-192.png" alt="" width="44" height="44">
+          <h3>Linux</h3>
+          <p data-i18n="download.linux.desc">Build from source with cargo; AppImage and .deb packages are on the roadmap.</p>
+          <a class="btn" data-download="linux" href="https://github.com/hi77x/tedrox-documents#build-from-source" rel="noopener" data-i18n="download.linux.action">Build instructions</a>
+        </article>
+        <article class="card download-card">
+          <img src="assets/icon-192.png" alt="" width="44" height="44">
+          <h3>Android</h3>
+          <p data-i18n="download.android.desc">Native Android shell is in development; the shared core is ready for it.</p>
+          <span class="btn btn-disabled" data-i18n="download.android.action">In development</span>
+        </article>
+        <article class="card download-card">
+          <img src="assets/mark.svg" alt="" width="44" height="44">
+          <h3 data-i18n="download.source.title">Source</h3>
+          <p data-i18n="download.source.desc">MIT licensed Rust workspace. Build everything with cargo.</p>
+          <a class="btn" href="https://github.com/hi77x/tedrox-documents" rel="noopener" data-i18n="download.source.action">Browse the repository</a>
+        </article>
+      </div>
+      <p class="caption" data-i18n="download.note">SHA256 checksums are attached to every release. Code signing is not configured yet, so Windows SmartScreen may warn on first run.</p>
+    </section>
+
+    <section id="faq" class="section shell">
+      <h2 data-i18n="faq.title">FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary data-i18n="faq.q1">Does anything get uploaded?</summary>
+          <p data-i18n="faq.a1">No. All processing happens locally in the native Rust core. The application has no server component and requires no account.</p>
+        </details>
+        <details>
+          <summary data-i18n="faq.q2">How is this different from online converters?</summary>
+          <p data-i18n="faq.a2">Speed, privacy and reliability. There are no queues, no file size limits imposed by someone else's server, and no documents sitting in a temporary cloud folder.</p>
+        </details>
+        <details>
+          <summary data-i18n="faq.q3">Which licenses do the dependencies use?</summary>
+          <p data-i18n="faq.a3">The core targets permissive licenses only (MIT, Apache-2.0, BSD, ISC, Zlib, MPL-2.0). LibreOffice and PDFium are optional external adapters, never bundled, and are documented in THIRD_PARTY_LICENSES.md.</p>
+        </details>
+        <details>
+          <summary data-i18n="faq.q4">Can I use it in scripts and CI?</summary>
+          <p data-i18n="faq.a4">Yes. tdx-doc returns stable exit codes, supports --json everywhere and works without any GUI. See docs/cli.md.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-row">
+      <div>
+        <strong>TEDROX Documents</strong>
+        <p data-i18n="footer.built">Built with a shared Rust core. MIT licensed.</p>
+      </div>
+      <nav aria-label="Footer">
+        <a href="https://github.com/hi77x/tedrox-documents" rel="noopener" data-i18n="footer.repo">Repository</a>
+        <a href="https://github.com/hi77x/tedrox-documents/blob/main/docs/cli.md" rel="noopener" data-i18n="footer.cloud">CLI docs</a>
+        <a href="https://github.com/hi77x/tedrox-documents/issues" rel="noopener" data-i18n="footer.issues">Issues</a>
+        <a href="https://github.com/hi77x/tedrox-documents/blob/main/LICENSE" rel="noopener">MIT</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

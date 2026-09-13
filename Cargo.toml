@@ -1,0 +1,49 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/tdx-core",
+    "crates/tdx-jobs",
+    "crates/tdx-pdf",
+    "crates/tdx-image",
+    "crates/tdx-sheet",
+    "crates/tdx-docx",
+    "crates/tdx-archive",
+    "crates/tdx-convert",
+    "crates/tdx-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/hi77x/tedrox-documents"
+homepage = "https://documents.tedrox.space"
+authors = ["TEDROX Documents contributors"]
+rust-version = "1.80"
+
+[workspace.dependencies]
+tdx-core = { path = "crates/tdx-core" }
+tdx-jobs = { path = "crates/tdx-jobs" }
+tdx-pdf = { path = "crates/tdx-pdf" }
+tdx-image = { path = "crates/tdx-image" }
+tdx-sheet = { path = "crates/tdx-sheet" }
+tdx-docx = { path = "crates/tdx-docx" }
+tdx-archive = { path = "crates/tdx-archive" }
+tdx-convert = { path = "crates/tdx-convert" }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+thiserror = "2"
+anyhow = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+clap = { version = "4", features = ["derive"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 2

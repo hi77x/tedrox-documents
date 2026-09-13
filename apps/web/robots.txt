@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://documents.tedrox.space/sitemap.xml

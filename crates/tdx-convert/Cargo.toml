@@ -1,0 +1,25 @@
+[package]
+name = "tdx-convert"
+description = "Conversion center routing for TEDROX Documents."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+tdx-core.workspace = true
+tdx-pdf.workspace = true
+tdx-docx.workspace = true
+tdx-sheet.workspace = true
+tdx-image.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+printpdf = "0.7"
+
+[dev-dependencies]
+image = "0.25.6"
+tempfile = "3.27.0"

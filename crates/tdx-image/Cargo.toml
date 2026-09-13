@@ -1,0 +1,23 @@
+[package]
+name = "tdx-image"
+description = "Image lab for TEDROX Documents: conversion, resize, SVG rasterization and tracing."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+tdx-core.workspace = true
+image = "0.25.6"
+resvg = "0.45.1"
+serde.workspace = true
+thiserror.workspace = true
+vtracer = "0.6.5"
+base64 = "0.23.1"
+uuid = { workspace = true, features = ["v4"] }
+
+[dev-dependencies]
+tempfile = "3.27.0"

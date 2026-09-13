@@ -1,0 +1,21 @@
+[package]
+name = "tdx-core"
+description = "Shared core for TEDROX Documents: file type detection, operation registry, errors, filesystem utilities."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+chrono = { version = "0.4.45", features = ["serde"] }
+fs4 = "1.1.0"
+infer = "0.22.0"
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+tempfile = "3.27.0"
+thiserror.workspace = true
+tracing = "0.1.44"
+uuid = { workspace = true, features = ["v4", "serde"] }

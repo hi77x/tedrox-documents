@@ -1,0 +1,23 @@
+[package]
+name = "tdx-pdf"
+description = "PDF engine for TEDROX Documents: page operations, metadata, optimization, image import/export."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+tdx-core.workspace = true
+tdx-jobs.workspace = true
+flate2 = "1.1.10"
+image = "0.25.6"
+lopdf = "0.36.0"
+serde.workspace = true
+tempfile = "3.27.0"
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile = "3.27.0"

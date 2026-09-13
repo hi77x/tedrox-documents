@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="TEDROX Documents monochrome">
+  <rect width="512" height="512" rx="112" fill="none"/>
+  <path d="M150 96h156l96 96v224a32 32 0 0 1-32 32H150a32 32 0 0 1-32-32V128a32 32 0 0 1 32-32z" fill="none" stroke="#0f1115" stroke-width="28"/>
+  <path d="M306 96l96 96h-80a16 16 0 0 1-16-16z" fill="#0f1115"/>
+  <path d="M188 252h136v24H188z" fill="#0f1115"/>
+  <path d="M188 304h136v24H188z" fill="#0f1115"/>
+  <path d="M188 356h88v24h-88z" fill="#0f1115"/>
+</svg>

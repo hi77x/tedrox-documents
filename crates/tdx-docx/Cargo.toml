@@ -1,0 +1,22 @@
+[package]
+name = "tdx-docx"
+description = "DOCX reader/writer for TEDROX Documents based on the OOXML container."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+tdx-core.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+zip = { version = "4.2.0", default-features = false, features = ["deflate-flate2"] }
+flate2 = "1"
+chrono = { version = "0.4.45", features = ["serde"] }
+uuid = { workspace = true, features = ["v4"] }
+
+[dev-dependencies]
+tempfile = "3.27.0"
