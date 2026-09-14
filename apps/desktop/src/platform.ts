@@ -42,7 +42,7 @@ export type OpenOptions = {
 
 /** Everything the UI needs from its host platform. */
 export type Platform = {
-  kind: "desktop" | "mock";
+  kind: "desktop" | "web" | "mock";
   openPaths(options: OpenOptions): Promise<string[] | null>;
   savePath(suggested: string, extension: string, label: string): Promise<string | null>;
   invoke<T>(command: string, args?: Record<string, unknown>): Promise<T>;
@@ -184,6 +184,11 @@ export function platform(): Platform {
 
 export function installMockPlatform(fixtures: MockFixtures): void {
   cached = mockPlatform(fixtures);
+}
+
+/** Replace the host adapter entirely (used by the browser build). */
+export function setPlatform(adapter: Platform): void {
+  cached = adapter;
 }
 
 export function formatBytes(bytes: number): string {
