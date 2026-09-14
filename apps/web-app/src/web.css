@@ -1,0 +1,17 @@
+/* Browser shell additions on top of the shared design system. */
+
+.web-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: var(--fs-sm);
+  border-bottom: 1px solid var(--accent-border);
+}
+
+.web-banner a {
+  color: inherit;
+  font-weight: 600;
+}

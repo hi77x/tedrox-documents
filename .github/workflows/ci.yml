@@ -99,6 +99,28 @@ jobs:
         working-directory: apps/desktop
         run: npm test
 
+  web-app:
+    name: Web application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/web-app/package-lock.json
+      - name: Install
+        working-directory: apps/web-app
+        run: npm ci --no-fund --no-audit
+      - name: Typecheck and build
+        working-directory: apps/web-app
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-app
+          path: apps/web-app/dist
+          retention-days: 14
+
   screenshots:
     name: Product screenshots
     runs-on: ubuntu-latest

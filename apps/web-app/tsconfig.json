@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@desktop/*": ["../desktop/src/*"],
+      "@tauri-apps/api/core": ["./src/shims/tauri-core.ts"],
+      "@tauri-apps/api/event": ["./src/shims/tauri-event.ts"],
+      "@tauri-apps/api/webview": ["./src/shims/tauri-webview.ts"],
+      "@tauri-apps/plugin-dialog": ["./src/shims/tauri-dialog.ts"],
+      "@tauri-apps/plugin-opener": ["./src/shims/tauri-opener.ts"]
+    }
+  },
+  "include": ["src", "../desktop/src"]
+}
