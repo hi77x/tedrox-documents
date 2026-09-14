@@ -7,7 +7,7 @@ here, treat it as unsupported until a release note says otherwise.
 
 | Format | Open | Edit | Convert | Merge/Split | Batch | Engine |
 | --- | --- | --- | --- | --- | --- | --- |
-| PDF | Yes | Metadata | Yes | Yes | Yes | lopdf (MIT) |
+| PDF | Yes | Pages, annotations, forms | Yes | Yes | Yes | lopdf (MIT) + PDF.js rendering |
 | DOCX | Yes | Yes (editor) | Yes | — | — | native OOXML |
 | DOC (legacy) | Adapter | — | Adapter | — | — | LibreOffice |
 | Markdown | Yes | Yes | Yes | — | — | native |
@@ -25,6 +25,36 @@ here, treat it as unsupported until a release note says otherwise.
 | ICO | Create | — | — | — | — | image |
 | ZIP | Yes | — | — | — | — | zip (MIT) |
 | 7z / TAR / GZ | Detect | — | — | — | — | — |
+
+## PDF editing
+
+| Capability | State | Notes |
+| --- | --- | --- |
+| Reorder, rotate, delete, duplicate, reverse | Yes | One atomic page plan, re-opened and verified after writing |
+| Merge, insert, split, extract, odd/even | Yes | Shared object-import routine with fresh object ids |
+| Highlight, underline, strike out | Yes | `/Highlight`, `/Underline`, `/StrikeOut` with `/QuadPoints` |
+| Ink, rectangle, ellipse, line, arrow | Yes | Generated appearance streams, honoured by other readers |
+| Free text and comments | Yes | Base-14 Helvetica appearance; non-Latin text raises a warning |
+| AcroForm reading and filling | Yes | Text, choice, check box and radio; `/NeedAppearances` is set |
+| Compression presets | Yes | Screen, balanced, print and custom DPI/quality |
+| Privacy clean | Yes | Info, XMP, JavaScript, embedded files and launch actions |
+| Encryption and digital signatures | No | Not exposed in the interface |
+| Redaction | No | Not implemented and deliberately not offered |
+
+New annotations are appended to the existing `/Annots` array; annotations that
+were already in the document are preserved.
+
+## Spreadsheet model
+
+| Capability | State | Notes |
+| --- | --- | --- |
+| Values and formulas | Yes | Formulas are re-evaluated on load and saved as formulas |
+| Multiple sheets | Yes | Names, order and per-sheet cells |
+| Bold, italic, underline, alignment | Yes | Round-trips through TEDROX-created workbooks |
+| Text colour, fill colour | Yes | |
+| Number formats | Yes | Excel format codes such as `#,##0.00`, `0.00%`, `yyyy-mm-dd` |
+| Formatting written by other applications | Not read back | The editor probes `xl/styles.xml` and warns before overwriting |
+| Charts | Rendered in the editor | Charts are drawn from the live sheet data, not stored in the file |
 
 ## PDF rendering adapter (PDFium)
 
