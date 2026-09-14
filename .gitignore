@@ -24,3 +24,19 @@ Thumbs.db
 .idea
 .vscode/*
 !.vscode/extensions.json
+
+# Internal planning material must never enter this repository.
+ROADMAP.md
+SPEC.md
+SPECS/
+TASKS.md
+PLAN.md
+IMPLEMENTATION_PLAN.md
+RESEARCH.md
+*_PROGRESS.md
+*_ROADMAP.md
+*_PLAN.md
+*_TASKS.md
+AGENTS.md
+CLAUDE.md
+prompts/

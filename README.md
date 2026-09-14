@@ -19,8 +19,7 @@
 <p align="center">
   <a href="https://documents.tedrox.space">Website</a> ·
   <a href="docs/cli.md">CLI documentation</a> ·
-  <a href="docs/formats.md">Format support</a> ·
-  <a href="ROADMAP.md">Roadmap</a>
+  <a href="docs/formats.md">Format support</a>
 </p>
 
 ---
@@ -240,19 +239,6 @@ English is the canonical language; Russian is fully supported. Dictionaries
 live in [packages/i18n](packages/i18n) and are validated by CI — every English
 key must exist in Russian with no orphans. See
 [docs/localization.md](docs/localization.md).
-
-## Roadmap
-
-- Tables, page breaks and images inside the document editor
-- Multiple sheets, number formats and charts in the spreadsheet editor
-- Linux AppImage and `.deb` packages
-- Android shell with Storage Access Framework
-- PDF page rasterization through the optional PDFium adapter
-- True redaction pipeline with verification
-- Font subsetting for smaller generated PDFs
-- Batch queue UI and operation presets
-
-See [ROADMAP.md](ROADMAP.md) for details.
 
 ## Contributing
 
