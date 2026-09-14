@@ -73,8 +73,58 @@ jobs:
         run: node scripts/license-audit.mjs
       - name: Check generated files are committed
         run: |
-          if ! git diff --quiet -- packages/i18n apps/web/i18n apps/web/en.json apps/web/ru.json apps/desktop/src/i18n THIRD_PARTY_LICENSES.md; then
+          if ! git diff --quiet -- packages/i18n apps/web/i18n apps/web/en.json apps/web/ru.json THIRD_PARTY_LICENSES.md; then
             echo "Generated files are out of date. Run the scripts and commit the result." >&2
             git diff --stat
             exit 1
           fi
+
+  frontend:
+    name: Desktop UI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+      - name: Install
+        working-directory: apps/desktop
+        run: npm ci --no-fund --no-audit
+      - name: Typecheck and build
+        working-directory: apps/desktop
+        run: npm run build
+      - name: Formula engine tests
+        working-directory: apps/desktop
+        run: npm test
+
+  screenshots:
+    name: Product screenshots
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            apps/desktop/package-lock.json
+      - name: Install tooling
+        run: npm ci --no-fund --no-audit
+      - name: Install app dependencies
+        working-directory: apps/desktop
+        run: npm ci --no-fund --no-audit
+      - name: Install Chromium
+        run: npx playwright-core install --with-deps chromium
+      - name: Build harness
+        working-directory: apps/desktop
+        run: npm run build
+      - name: Capture screenshots
+        run: npm run screenshots
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: assets/screenshots/*.png
+          retention-days: 14

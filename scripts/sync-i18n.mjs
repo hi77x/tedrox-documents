@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const source = join(root, "packages", "i18n");
-const targets = [join(root, "apps", "web", "i18n"), join(root, "apps", "desktop", "src", "i18n")];
+const targets = [join(root, "apps", "web", "i18n")];
 
 const languages = ["en", "ru"];
 const dictionaries = {};

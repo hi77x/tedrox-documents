@@ -35,6 +35,20 @@ pub struct CellModel {
     pub bold: bool,
     #[serde(default)]
     pub italic: bool,
+    #[serde(default)]
+    pub underline: bool,
+    /// `left`, `center`, `right` or `justify`.
+    #[serde(default)]
+    pub align: Option<String>,
+    /// Text colour as `RRGGBB`.
+    #[serde(default)]
+    pub color: Option<String>,
+    /// Cell fill as `RRGGBB`.
+    #[serde(default)]
+    pub fill: Option<String>,
+    /// Excel number format code, for example `0.00`, `#,##0`, `0%` or a date.
+    #[serde(default)]
+    pub format: Option<String>,
 }
 
 fn cell_to_text(cell: &Data) -> String {
@@ -91,6 +105,7 @@ fn load_delimited(input: &Path, delimiter: Option<char>) -> Result<WorkbookModel
                 formula: None,
                 bold: false,
                 italic: false,
+                ..Default::default()
             });
         }
         rows += 1;
@@ -135,6 +150,7 @@ fn load_spreadsheet(input: &Path) -> Result<WorkbookModel> {
                     formula: None,
                     bold: false,
                     italic: false,
+                    ..Default::default()
                 });
             }
         }
@@ -162,18 +178,58 @@ pub fn load_workbook(input: &Path) -> Result<WorkbookModel> {
     }
 }
 
-fn format_for(bold: bool, italic: bool) -> Option<Format> {
-    if !bold && !italic {
+fn has_cell_format(cell: &CellModel) -> bool {
+    cell.bold
+        || cell.italic
+        || cell.underline
+        || cell.align.is_some()
+        || cell.color.is_some()
+        || cell.fill.is_some()
+        || cell.format.is_some()
+}
+
+fn format_for(cell: &CellModel) -> Option<Format> {
+    if !has_cell_format(cell) {
         return None;
     }
     let mut format = Format::new();
-    if bold {
+    if cell.bold {
         format = format.set_bold();
     }
-    if italic {
+    if cell.italic {
         format = format.set_italic();
     }
+    if cell.underline {
+        format = format.set_underline(rust_xlsxwriter::FormatUnderline::Single);
+    }
+    if let Some(color) = cell.color.as_deref().and_then(parse_color) {
+        format = format.set_font_color(color);
+    }
+    if let Some(fill) = cell.fill.as_deref().and_then(parse_color) {
+        format = format.set_background_color(fill);
+    }
+    if let Some(align) = cell.align.as_deref() {
+        format = match align {
+            "center" => format.set_align(rust_xlsxwriter::FormatAlign::Center),
+            "right" => format.set_align(rust_xlsxwriter::FormatAlign::Right),
+            "justify" => format.set_align(rust_xlsxwriter::FormatAlign::Justify),
+            _ => format.set_align(rust_xlsxwriter::FormatAlign::Left),
+        };
+    }
+    if let Some(code) = cell.format.as_deref() {
+        if !code.is_empty() {
+            format = format.set_num_format(code);
+        }
+    }
     Some(format)
+}
+
+fn parse_color(value: &str) -> Option<u32> {
+    let hex = value.trim_start_matches('#');
+    if hex.len() != 6 {
+        return None;
+    }
+    u32::from_str_radix(hex, 16).ok()
 }
 
 fn save_xlsx(model: &WorkbookModel, output: &Path) -> Result<()> {
@@ -188,9 +244,17 @@ fn save_xlsx(model: &WorkbookModel, output: &Path) -> Result<()> {
         for cell in &sheet.cells {
             let row = cell.row;
             let col = cell.col;
-            let format = format_for(cell.bold, cell.italic);
+            let format = format_for(cell);
             if let Some(formula) = &cell.formula {
-                let _ = worksheet.write_formula(row, col, formula.as_str());
+                match &format {
+                    Some(format) => {
+                        let _ =
+                            worksheet.write_formula_with_format(row, col, formula.as_str(), format);
+                    }
+                    None => {
+                        let _ = worksheet.write_formula(row, col, formula.as_str());
+                    }
+                }
                 continue;
             }
             let value = cell.value.trim();
@@ -268,6 +332,54 @@ fn save_delimited(model: &WorkbookModel, output: &Path, delimiter: char) -> Resu
     })
 }
 
+/// Result of inspecting whether a workbook contains cell formatting.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FormattingProbe {
+    /// True when the file uses cell styles the editor cannot read back.
+    pub has_formatting: bool,
+    /// Number of cell format records found in the package.
+    pub format_count: u32,
+}
+
+/// Report whether an XLSX package contains cell styles.
+///
+/// The reader is value-oriented (calamine does not expose cell styles), so the
+/// editor tells the user before overwriting a file whose formatting it cannot
+/// reproduce.
+pub fn probe_formatting(input: &Path) -> Result<FormattingProbe> {
+    let extension = input
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| ext.to_ascii_lowercase())
+        .unwrap_or_default();
+    if extension != "xlsx" && extension != "xlsm" {
+        return Ok(FormattingProbe {
+            has_formatting: false,
+            format_count: 0,
+        });
+    }
+    let file = std::fs::File::open(input)?;
+    let mut archive = zip::ZipArchive::new(file)
+        .map_err(|err| TdxError::Corrupt(format!("Cannot read the workbook package: {err}")))?;
+    let mut styles = match archive.by_name("xl/styles.xml") {
+        Ok(entry) => entry,
+        Err(_) => {
+            return Ok(FormattingProbe {
+                has_formatting: false,
+                format_count: 0,
+            })
+        }
+    };
+    let mut xml = String::new();
+    std::io::Read::read_to_string(&mut styles, &mut xml)
+        .map_err(|err| TdxError::Corrupt(format!("Cannot read cell styles: {err}")))?;
+    let count = xml.matches("<xf ").count() as u32;
+    Ok(FormattingProbe {
+        has_formatting: count > 1,
+        format_count: count,
+    })
+}
+
 /// Save the editor model as XLSX or CSV depending on the extension.
 pub fn save_workbook(model: &WorkbookModel, output: &Path) -> Result<()> {
     let extension = output
@@ -315,6 +427,7 @@ mod tests {
                         formula: None,
                         bold: true,
                         italic: false,
+                        ..Default::default()
                     },
                     CellModel {
                         row: 1,
@@ -323,6 +436,7 @@ mod tests {
                         formula: None,
                         bold: false,
                         italic: false,
+                        ..Default::default()
                     },
                     CellModel {
                         row: 2,
@@ -331,6 +445,7 @@ mod tests {
                         formula: Some("=SUM(A2:A2)".into()),
                         bold: false,
                         italic: true,
+                        ..Default::default()
                     },
                 ],
             }],

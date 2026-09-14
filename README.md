@@ -5,15 +5,15 @@
 <h1 align="center">TEDROX Documents</h1>
 
 <p align="center">
-  <strong>Your document toolbox. Offline. Fast. Open.</strong><br>
-  PDF, Office documents, spreadsheets, images and conversions — processed locally on your machine.
+  <strong>One app for documents.</strong><br>
+  Open, edit, convert and organize PDF, Word, spreadsheets and images — locally.
 </p>
 
 <p align="center">
   <a href="https://github.com/hi77x/tedrox-documents/releases"><img alt="Release" src="https://img.shields.io/github/v/release/hi77x/tedrox-documents?include_prereleases&style=flat-square"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square"></a>
   <a href="https://github.com/hi77x/tedrox-documents/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/hi77x/tedrox-documents/ci.yml?style=flat-square"></a>
-  <img alt="Platforms" src="https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20%7C%20Android%20(in%20progress)-lightgrey?style=flat-square">
+  <img alt="Platforms" src="https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20CLI%20%7C%20Android%20(in%20progress)-lightgrey?style=flat-square">
 </p>
 
 <p align="center">
@@ -26,167 +26,154 @@
 
 ## What it is
 
-TEDROX Documents is your local office workbench: create and edit documents and
-spreadsheets, merge and clean PDFs, convert files, all in one native
-application built on a shared Rust core. Everything runs locally: no uploads,
-no account, no queues, no "free tier" limits.
+TEDROX Documents is a local-first office suite built on one Rust engine with a
+Tauri 2 desktop shell on top. The same engine powers the graphical application
+and the `tdx-doc` command line, so a conversion scripted in CI produces exactly
+the same bytes as the same operation in the window.
 
-The project is under active development. This repository already contains the
-complete native engine, a scriptable CLI, the Windows desktop application and
-automated release pipelines; the Android shell will reuse the same core.
+Everything runs on the machine you are using: no uploads, no account, no
+queues, no "free tier" limits.
 
-## Status
+## Screenshots
 
-| Area | State |
-| --- | --- |
-| Rust core (`tdx-*` crates) | Working, tested |
-| CLI `tdx-doc` | Working, tested, packaged |
-| Windows build | Publishing with every release |
-| Desktop app (Tauri 2) | Document editor, spreadsheet editor, PDF/image/convert tools |
-| Linux build | Builds from source; packages on the roadmap |
-| Android shell | Planned; shared core is ready |
-| Landing page | Live at [tedrot3u.tedrox.space](https://tedrot3u.tedrox.space); custom domain `documents.tedrox.space` pending DNS |
+Real captures of the application, generated headlessly from production
+components (see `scripts/capture-screenshots.mjs`).
 
-## Demo
+<p align="center">
+  <img src="assets/screenshots/home.png" alt="Start screen with recent files and quick actions" width="720">
+  <img src="assets/screenshots/pdf-view.png" alt="PDF workspace with thumbnails, page canvas, search and outline" width="720">
+  <img src="assets/screenshots/pdf-organize.png" alt="Page organizer with drag and drop reordering" width="720">
+  <img src="assets/screenshots/spreadsheet.png" alt="Spreadsheet with formulas, number formats and a live chart" width="720">
+  <img src="assets/screenshots/document.png" alt="Document editor with paginated layout" width="720">
+</p>
 
-Real output from the CLI on Windows:
+## Workspaces
+
+**Home** — recent and pinned files, new document, new spreadsheet, open file,
+drag and drop, batch conversion shortcuts.
+
+**PDF** — open an existing PDF and read it in a continuous, zoomable canvas with
+page thumbnails, text selection, search with match navigation, document outline
+and metadata.
+- Organize: drag to reorder, rotate, delete, duplicate, reverse, extract, split,
+  merge another document in, export pages as PNG.
+- Annotate: highlight, underline, strike out, freehand ink, text boxes, comments,
+  rectangles, ellipses, arrows, colour and opacity. Annotations are written as
+  real PDF annotation objects with appearance streams.
+- Forms: read AcroForm fields and fill them, including check boxes and choice
+  fields.
+- Tools: compression presets, privacy clean (Info, XMP, JavaScript, embedded
+  files, launch actions), text watermark.
+- Saving is atomic and verified: the output is written to a sibling temporary
+  file and only replaces the original after it re-opens successfully.
+
+**Writer** — real OOXML round-trip. Headings, fonts, sizes, bold, italic,
+underline, colour, highlight, alignment, bullet and numbered lists, quotes,
+find and replace, live pagination with page boundaries, word count and PDF
+export.
+
+**Sheets** — workbooks with multiple sheets, a virtualized grid, a real formula
+engine, number formats, alignment, fill colours, sorting, filtering, duplicate
+removal and data-bound charts.
+
+**Convert** — type detection, per-file operation lists and batch runs over many
+files with progress, cancellation and a report. Images have their own tab for
+format conversion, resizing, rotation, cropping and metadata stripping.
+
+## Formula engine
+
+The evaluator is a tokenizer and recursive-descent parser over the Excel
+grammar, with dependency tracking and circular-reference detection. Supported
+functions include:
+
+`SUM` `SUMIF` `SUMIFS` `SUMPRODUCT` `COUNT` `COUNTA` `COUNTBLANK` `COUNTIF`
+`COUNTIFS` `AVERAGE` `AVERAGEIF` `AVERAGEIFS` `MIN` `MAX` `MEDIAN` `STDEV`
+`IF` `IFS` `SWITCH` `AND` `OR` `XOR` `NOT` `IFERROR` `IFNA` `ABS` `SIGN` `ROUND`
+`ROUNDUP` `ROUNDDOWN` `INT` `TRUNC` `MOD` `POWER` `SQRT` `EXP` `LN` `LOG`
+`LOG10` `PI` `CEILING` `FLOOR` `LEFT` `RIGHT` `MID` `LEN` `TRIM` `CLEAN` `LOWER`
+`UPPER` `PROPER` `CONCAT` `CONCATENATE` `TEXTJOIN` `FIND` `SEARCH` `SUBSTITUTE`
+`REPLACE` `REPT` `VALUE` `TEXT` `DATE` `TIME` `TODAY` `NOW` `YEAR` `MONTH` `DAY`
+`HOUR` `MINUTE` `WEEKDAY` `DAYS` `EDATE` `ROW` `COLUMN` `ROWS` `COLUMNS` `INDEX`
+`MATCH` `VLOOKUP` `HLOOKUP` `XLOOKUP` `OFFSET`
+
+Every function above is covered by assertions in
+`apps/desktop/scripts/formula-tests.mjs`, which run in CI. `FILTER`, `SORT` and
+`UNIQUE` need array spill and are therefore **not** implemented — they return
+`#NAME?` instead of a wrong answer.
+
+## CLI
+
+`tdx-doc` exposes the same engine without a GUI.
 
 ```console
 $ tdx-doc convert report.md -o report.pdf
-Done in 208 ms (105 B in, 96 KB out)
-  blocks: 5
-  font: built-in Helvetica
-
-$ tdx-doc pdf merge report.pdf appendix.pdf -o merged.pdf
-Done in 1.29 s (188 KB in, 191 KB out)
-  files: 2
-  pages: 2
-
-$ tdx-doc pdf clean merged.pdf -o clean.pdf
-Done in 962 ms (191 KB in, 190 KB out)
-  removed_entries: 2
-
+$ tdx-doc pdf merge a.pdf b.pdf -o merged.pdf
+$ tdx-doc pdf compress report.pdf -o small.pdf --preset screen
+$ tdx-doc pdf clean private.pdf -o clean.pdf
 $ tdx-doc csv to-xlsx data.csv -o data.xlsx
-Done in 156 ms (48 B in, 5.3 KB out)
-  sheet: Sheet1
+$ tdx-doc image trace logo.png -o logo.svg --preset poster
+$ tdx-doc inspect anything --json
 ```
 
-### Desktop application
+Run `tdx-doc --help` or see [docs/cli.md](docs/cli.md).
 
-Real screenshots of the running application (Windows 10, v0.2.0): the start
-screen, the DOCX document editor and the XLSX/CSV spreadsheet editor with live
-formulas.
+## Format support
 
-<p align="center">
-  <img src="assets/screenshots/v2-home.png" alt="TEDROX Documents start screen" width="640">
-  <img src="assets/screenshots/v2-document.png" alt="Document editor with headings, bold text and lists" width="640">
-  <img src="assets/screenshots/v2-spreadsheet.png" alt="Spreadsheet editor with data and live formulas" width="640">
-</p>
+Only what is implemented is listed; the capability levels are derived from the
+test suite.
 
-<p align="center">
-  <img src="assets/brand/og-source.svg" alt="TEDROX Documents" width="560">
-</p>
+| Format | Open | Edit | Export | Notes |
+| --- | --- | --- | --- | --- |
+| PDF | Yes | Pages, annotations, forms | Yes | Rendered with PDF.js in the shell; page operations use the Rust engine |
+| DOCX | Yes | Yes | DOCX, PDF, TXT, Markdown | Paragraph, character and list formatting; complex layout is flattened in PDF export |
+| Markdown / TXT | Yes | Yes | DOCX, PDF, HTML | |
+| HTML | Yes | — | PDF | Text-first rendering; scripts and CSS layout are ignored |
+| CSV / TSV | Yes | Yes | XLSX, JSON, CSV | Streaming reader with encoding and delimiter detection |
+| XLSX / ODS | Yes | Yes | XLSX, CSV | Values, formulas and TEDROX formatting round-trip; formatting applied by other applications is not read back and the editor warns before overwriting it |
+| Images | Yes | Yes | PNG, JPEG, WebP, TIFF, BMP, AVIF, ICO, SVG trace | |
+| ZIP | Yes | — | Yes | Safe extraction with zip-slip and decompression-bomb protection |
+| DOC / XLS (legacy) | Adapter | — | Adapter | Requires LibreOffice installed by the user |
 
-## Features
-
-**PDF**
-Merge · split · extract pages · delete pages · reorder · reverse · rotate ·
-insert one PDF into another · odd/even extraction · duplicate pages ·
-images → PDF · metadata viewer · metadata editor · privacy clean (Info, XMP,
-JavaScript, embedded files, actions) · image re-compression presets ·
-text watermark.
-
-**Documents (editor)**
-Create DOCX documents in the desktop app with a ribbon toolbar: headings, font
-family and size, bold, italic, underline, text color, alignment, bullet and
-numbered lists and quotes. Documents round-trip through real OOXML and export
-to PDF. The CLI adds Markdown/txt → DOCX, DOCX text/Markdown extraction and
-HTML → PDF. Legacy binary `.doc` import through the optional LibreOffice
-adapter.
-
-**Spreadsheets (editor) and CSV**
-Edit XLSX, CSV, TSV and ODS in the desktop app: formula bar, keyboard
-navigation, cell formatting, and a formula engine (SUM, AVERAGE, MIN, MAX,
-COUNT, ABS, ROUND, references, ranges, arithmetic). The CLI offers a full CSV
-workbench: delimiter and encoding detection, CSV ↔ XLSX ↔ JSON, filter, sort,
-deduplicate, trim, select and rename columns, split and join.
-
-**Images**
-PNG, JPEG, WebP, BMP, TIFF, AVIF conversion · resize (contain/cover/exact) ·
-crop · rotate · flip · metadata stripping · SVG rasterization · PNG → SVG embed
-mode · raster → SVG tracing (black & white, poster, photo) · ICO creation.
-
-**Files**
-ZIP creation and safe extraction (zip-slip and decompression-bomb protection) ·
-SHA-256 hashing · duplicate detection · batch rename with dry-run.
-
-## Supported formats
-
-Capability matrix for the current release — only what is implemented is marked:
-
-| Format | Open | Edit | Convert | Merge/Split | Notes |
-| --- | --- | --- | --- | --- | --- |
-| PDF | Yes | Metadata | Yes | Yes | Page rasterization needs the optional PDFium adapter |
-| DOCX | Yes | Yes | Yes | — | Editor with formatting; complex layout is flattened in PDF export |
-| Markdown / TXT | Yes | Yes | Yes | — | PDF export with system font embedding |
-| HTML | Yes | — | Yes | — | Text-first rendering; scripts and CSS layout ignored |
-| CSV / TSV | Yes | Yes | Yes | Split | Editor with formulas; streaming CLI parser with encoding detection |
-| XLSX / ODS | Yes | Yes | Yes | — | Editor with formulas; XLS import via LibreOffice |
-| Images | Yes | Yes | Yes | — | SVG tracing is for logos and line art, not photos |
-| ZIP | Yes | — | — | — | Safe extraction with limits |
-| DOC / XLS (legacy) | Adapter | — | Adapter | — | Requires LibreOffice installed by the user |
+Not implemented, and therefore not offered anywhere in the interface: PDF →
+DOCX reconstruction, true redaction, cryptographic signing, OCR, pivot tables,
+macros. The engine never executes document scripts or Office macros.
 
 ## Download
 
 Grab the latest build from [GitHub Releases](https://github.com/hi77x/tedrox-documents/releases):
 
-- **Windows desktop app** — `TEDROX-Documents-0.1.1-x64-setup.exe` (installer with Start menu entry and uninstaller)
-- **Windows command line** — `tdx-doc-windows-x86_64.zip` (portable `tdx-doc.exe`; run it from PowerShell or Windows Terminal)
-- **Linux CLI** — `tdx-doc-linux-x86_64.tar.gz`; AppImage and `.deb` are on the roadmap
-- **Android** — shell in development
-- **Source** — `Source code (zip/tar.gz)` on the release page
+- **Windows desktop app** — NSIS installer with a Start menu entry
+- **Windows CLI** — portable `tdx-doc.exe`
+- **Linux CLI** — `tdx-doc-linux-x86_64.tar.gz`
+- **Source** — build it yourself, see below
 
 Every release includes `SHA256SUMS.txt`. Code signing is not configured yet, so
-Windows SmartScreen may warn on first run. Double-clicking `tdx-doc.exe` shows
-usage instructions instead of silently closing.
+Windows SmartScreen may warn on first run.
 
-## Quick start
+## Build from source
+
+Prerequisites: Rust stable (1.80+), Node.js 20+.
 
 ```bash
-# Merge and optimize PDFs
-tdx-doc pdf merge a.pdf b.pdf -o merged.pdf
-tdx-doc pdf split book.pdf --chunk 25 --out-dir out/
-tdx-doc pdf compress report.pdf -o small.pdf --preset screen
-tdx-doc pdf clean private.pdf -o clean.pdf
+git clone https://github.com/hi77x/tedrox-documents
+cd tedrox-documents
 
-# Documents
-tdx-doc convert notes.md -o notes.pdf
-tdx-doc doc create contract.md -o contract.docx --title "Contract"
-tdx-doc doc extract contract.docx -o contract.txt
+cargo build --release -p tdx-cli     # produces target/release/tdx-doc
+cargo test --workspace               # engine tests
 
-# Spreadsheets
-tdx-doc csv info data.csv
-tdx-doc csv to-xlsx data.csv -o data.xlsx
-tdx-doc csv transform data.csv -o clean.csv --trim --dedupe --sort score --desc
-
-# Images
-tdx-doc image convert logo.png --to webp -o logo.webp
-tdx-doc image trace logo.png -o logo.svg --preset poster
-tdx-doc image svg-render icon.svg -o icon.png --width 512
-
-# Files
-tdx-doc archive zip project/ -o project.zip
-tdx-doc file hash *.pdf
-tdx-doc inspect anything --json
-tdx-doc tools
+cd apps/desktop
+npm ci
+npm run build                        # typecheck + production bundle
+npm test                             # formula engine assertions
 ```
 
-Run `tdx-doc --help` or see [docs/cli.md](docs/cli.md) for the full reference.
-Add `--json` to any command for machine-readable output.
+Platform notes: [docs/build.md](docs/build.md),
+[docs/windows.md](docs/windows.md), [docs/linux.md](docs/linux.md),
+[docs/android.md](docs/android.md).
 
 ## Privacy
 
-- No file ever leaves the machine that runs the command or the app.
+- No file ever leaves the machine that runs the command or the application.
 - No telemetry, no analytics, no crash reporting.
 - Logs contain operation ids, file types, sizes, durations and sanitized error
   categories — never document contents, extracted text or passwords.
@@ -195,12 +182,10 @@ Add `--json` to any command for machine-readable output.
 
 ## Architecture
 
-A shared Rust core with thin shells on top:
-
 ```text
- apps/desktop (Tauri 2 shell)      apps/web (landing)
-        │                               │
-crates/tdx-cli (tdx-doc) ── crates/tdx-convert
+ apps/desktop (Tauri 2 shell + React workspaces)
+        │
+ crates/tdx-cli (tdx-doc) ── crates/tdx-convert
         │                        │
         ├─ tdx-pdf   (lopdf)     ├─ tdx-docx (OOXML)
         ├─ tdx-image (image,     └─ tdx-sheet (csv, calamine,
@@ -210,41 +195,19 @@ crates/tdx-cli (tdx-doc) ── crates/tdx-convert
         └─ tdx-core (detection, registry, errors, atomic IO)
 ```
 
-Every operation is exposed through the same capability registry with inputs,
-outputs, cost class, cancellation support and platform availability, so the
-CLI, desktop shell and future plugins share one implementation. See
+The interface contains no document parsing logic: the shell calls engine APIs,
+and every operation is described once in the capability registry with honest
+inputs, outputs, cost class and cancellation support. See
 [ARCHITECTURE.md](ARCHITECTURE.md).
-
-## Build from source
-
-Prerequisites: Rust stable (1.80+), Node.js 20+ for the landing page tools.
-
-```bash
-git clone https://github.com/hi77x/tedrox-documents
-cd tedrox-documents
-
-cargo build --release -p tdx-cli     # produces target/release/tdx-doc
-cargo test --workspace               # unit + integration tests
-node scripts/license-audit.mjs       # dependency license gate
-node scripts/sync-i18n.mjs           # dictionary completeness check
-```
-
-Detailed platform notes: [docs/build.md](docs/build.md),
-[docs/windows.md](docs/windows.md), [docs/linux.md](docs/linux.md),
-[docs/android.md](docs/android.md).
-
-## Localization
-
-English is the canonical language; Russian is fully supported. Dictionaries
-live in [packages/i18n](packages/i18n) and are validated by CI — every English
-key must exist in Russian with no orphans. See
-[docs/localization.md](docs/localization.md).
 
 ## Contributing
 
 Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md)
 and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before starting. Security reports
 go through [SECURITY.md](SECURITY.md).
+
+Repository hygiene is enforced: internal planning documents are rejected by
+`scripts/check-repo-hygiene.mjs` in CI and must stay outside the repository.
 
 ## License
 

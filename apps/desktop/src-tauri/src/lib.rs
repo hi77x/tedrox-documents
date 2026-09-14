@@ -327,6 +327,151 @@ async fn pdf_metadata(file: String) -> Result<serde_json::Value, String> {
 }
 
 #[tauri::command]
+async fn pdf_info(file: String) -> Result<serde_json::Value, String> {
+    let info = tdx_pdf::inspect(std::path::Path::new(&file)).map_err(|e| e.to_string())?;
+    serde_json::to_value(info).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+async fn pdf_apply_plan(
+    file: String,
+    output: String,
+    plan: Vec<tdx_pdf::organize::PagePlanEntry>,
+    on_progress: Channel<ProgressMsg>,
+) -> Result<OpResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        match tdx_pdf::organize::apply_plan(
+            std::path::Path::new(&file),
+            &prepare_output(output),
+            &plan,
+            &sink(&on_progress),
+            &token(),
+        ) {
+            Ok(result) => {
+                done(&on_progress);
+                Ok(OpResult::from(result))
+            }
+            Err(err) => {
+                fail(&on_progress, &err);
+                Err(err.to_string())
+            }
+        }
+    })
+    .await
+    .map_err(|err| err.to_string())?
+}
+
+#[tauri::command]
+async fn pdf_add_annotations(
+    file: String,
+    output: String,
+    annotations: Vec<tdx_pdf::annotate::AnnotationInput>,
+    on_progress: Channel<ProgressMsg>,
+) -> Result<OpResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        match tdx_pdf::annotate::add_annotations(
+            std::path::Path::new(&file),
+            &prepare_output(output),
+            &annotations,
+            &sink(&on_progress),
+            &token(),
+        ) {
+            Ok(result) => {
+                done(&on_progress);
+                Ok(OpResult::from(result))
+            }
+            Err(err) => {
+                fail(&on_progress, &err);
+                Err(err.to_string())
+            }
+        }
+    })
+    .await
+    .map_err(|err| err.to_string())?
+}
+
+#[tauri::command]
+async fn pdf_list_annotations(file: String) -> Result<serde_json::Value, String> {
+    let annotations = tdx_pdf::annotate::list_annotations(std::path::Path::new(&file))
+        .map_err(|e| e.to_string())?;
+    serde_json::to_value(annotations).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+async fn pdf_form_fields(file: String) -> Result<serde_json::Value, String> {
+    let fields =
+        tdx_pdf::forms::list_fields(std::path::Path::new(&file)).map_err(|e| e.to_string())?;
+    serde_json::to_value(fields).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+async fn pdf_fill_form(
+    file: String,
+    output: String,
+    values: std::collections::BTreeMap<String, String>,
+    on_progress: Channel<ProgressMsg>,
+) -> Result<OpResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        match tdx_pdf::forms::fill_fields(
+            std::path::Path::new(&file),
+            &prepare_output(output),
+            &values,
+            &sink(&on_progress),
+            &token(),
+        ) {
+            Ok(result) => {
+                done(&on_progress);
+                Ok(OpResult::from(result))
+            }
+            Err(err) => {
+                fail(&on_progress, &err);
+                Err(err.to_string())
+            }
+        }
+    })
+    .await
+    .map_err(|err| err.to_string())?
+}
+
+/// Read a file as raw bytes for in-process viewers.
+#[tauri::command]
+async fn read_binary(path: String) -> Result<tauri::ipc::Response, String> {
+    let bytes = std::fs::read(&path).map_err(|err| format!("{}: {err}", path))?;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
+/// Write raw bytes (rendered pages, exports) without going through JSON.
+#[tauri::command]
+async fn write_binary(path: String, bytes: Vec<u8>) -> Result<u64, String> {
+    tdx_core::fsutil::atomic_write(std::path::Path::new(&path), |file| {
+        use std::io::Write;
+        file.write_all(&bytes)
+            .map_err(|err| tdx_core::error::TdxError::Io(err))
+    })
+    .map_err(|err| err.to_string())?;
+    Ok(std::fs::metadata(&path).map(|meta| meta.len()).unwrap_or(0))
+}
+
+/// Report the size of a file without loading it.
+#[tauri::command]
+async fn file_size(path: String) -> Result<u64, String> {
+    std::fs::metadata(&path)
+        .map(|meta| meta.len())
+        .map_err(|err| err.to_string())
+}
+
+/// Remove a source file. Only ever called after an explicit opt-in in the UI
+/// and after the replacement output has been written and verified.
+#[tauri::command]
+async fn delete_file(path: String) -> Result<(), String> {
+    let target = std::path::Path::new(&path);
+    if !target.is_file() {
+        return Err("Not a regular file".into());
+    }
+    std::fs::remove_file(target).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
 async fn pdf_watermark(
     file: String,
     output: String,
@@ -505,6 +650,174 @@ async fn xlsx_to_csv(
 }
 
 #[tauri::command]
+async fn doc_extract(file: String, output: String, markdown: bool) -> Result<String, String> {
+    let path = std::path::Path::new(&file);
+    let text = if markdown {
+        tdx_docx::extract_markdown(path)
+    } else {
+        tdx_docx::extract_text(path)
+    }
+    .map_err(|err| err.to_string())?;
+    let target = std::path::Path::new(&output);
+    tdx_core::fsutil::atomic_write(target, |handle| {
+        use std::io::Write;
+        handle.write_all(text.as_bytes()).map_err(TdxError::Io)
+    })
+    .map_err(|err| err.to_string())?;
+    Ok(output)
+}
+
+#[tauri::command]
+async fn doc_from_markdown(
+    file: String,
+    output: String,
+    title: Option<String>,
+    on_progress: Channel<ProgressMsg>,
+) -> Result<OpResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let options = tdx_docx::DocxOptions {
+            title,
+            author: None,
+        };
+        match tdx_docx::create_from_file(
+            std::path::Path::new(&file),
+            &prepare_output(output),
+            &options,
+            &sink(&on_progress),
+            &token(),
+        ) {
+            Ok(result) => {
+                done(&on_progress);
+                Ok(OpResult::from(result.finalize()))
+            }
+            Err(err) => {
+                fail(&on_progress, &err);
+                Err(err.to_string())
+            }
+        }
+    })
+    .await
+    .map_err(|err| err.to_string())?
+}
+
+#[tauri::command]
+async fn markdown_to_html(file: String, output: String) -> Result<String, String> {
+    let result = tdx_convert::markdown_to_html_file(
+        std::path::Path::new(&file),
+        std::path::Path::new(&output),
+    )
+    .map_err(|err| err.to_string())?;
+    Ok(result.finalize().outputs[0].path.display().to_string())
+}
+
+#[tauri::command]
+async fn image_crop(
+    file: String,
+    output: String,
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
+    on_progress: Channel<ProgressMsg>,
+) -> Result<OpResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let format = std::path::Path::new(&output)
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .and_then(tdx_image::OutputFormat::from_extension)
+            .unwrap_or(tdx_image::OutputFormat::Png);
+        match tdx_image::crop(
+            std::path::Path::new(&file),
+            &prepare_output(output),
+            x,
+            y,
+            width,
+            height,
+            format,
+            92,
+            &sink(&on_progress),
+            &token(),
+        ) {
+            Ok(result) => {
+                done(&on_progress);
+                Ok(OpResult::from(result.finalize()))
+            }
+            Err(err) => {
+                fail(&on_progress, &err);
+                Err(err.to_string())
+            }
+        }
+    })
+    .await
+    .map_err(|err| err.to_string())?
+}
+
+#[tauri::command]
+async fn image_rotate(
+    file: String,
+    output: String,
+    degrees: i32,
+    flip_horizontal: bool,
+    flip_vertical: bool,
+    on_progress: Channel<ProgressMsg>,
+) -> Result<OpResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let format = std::path::Path::new(&output)
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .and_then(tdx_image::OutputFormat::from_extension);
+        match tdx_image::rotate_flip(
+            std::path::Path::new(&file),
+            &prepare_output(output),
+            degrees,
+            flip_horizontal,
+            flip_vertical,
+            format,
+            &sink(&on_progress),
+            &token(),
+        ) {
+            Ok(result) => {
+                done(&on_progress);
+                Ok(OpResult::from(result.finalize()))
+            }
+            Err(err) => {
+                fail(&on_progress, &err);
+                Err(err.to_string())
+            }
+        }
+    })
+    .await
+    .map_err(|err| err.to_string())?
+}
+
+#[tauri::command]
+async fn image_strip_metadata(
+    file: String,
+    output: String,
+    on_progress: Channel<ProgressMsg>,
+) -> Result<OpResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        match tdx_image::strip_metadata(
+            std::path::Path::new(&file),
+            &prepare_output(output),
+            &sink(&on_progress),
+            &token(),
+        ) {
+            Ok(result) => {
+                done(&on_progress);
+                Ok(OpResult::from(result.finalize()))
+            }
+            Err(err) => {
+                fail(&on_progress, &err);
+                Err(err.to_string())
+            }
+        }
+    })
+    .await
+    .map_err(|err| err.to_string())?
+}
+
+#[tauri::command]
 async fn convert_auto(
     file: String,
     output: String,
@@ -593,12 +906,28 @@ pub fn run() {
             pdf_clean,
             pdf_compress,
             pdf_metadata,
+            pdf_info,
             pdf_watermark,
+            pdf_apply_plan,
+            pdf_add_annotations,
+            pdf_list_annotations,
+            pdf_form_fields,
+            pdf_fill_form,
+            read_binary,
+            write_binary,
+            file_size,
+            delete_file,
             image_convert,
             image_resize,
             csv_to_xlsx,
             xlsx_to_csv,
-            convert_auto
+            convert_auto,
+            doc_extract,
+            doc_from_markdown,
+            markdown_to_html,
+            image_crop,
+            image_rotate,
+            image_strip_metadata
         ])
         .run(tauri::generate_context!())
         .expect("error while running TEDROX Documents");

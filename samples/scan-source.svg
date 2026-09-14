@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754" viewBox="0 0 1240 1754">
+  <rect width="1240" height="1754" fill="#f7f5f0"/>
+  <g font-family="Georgia, serif" fill="#2b2b2b">
+    <text x="120" y="180" font-size="46" font-weight="bold">INVOICE 2026-0914</text>
+    <text x="120" y="240" font-size="26">TEDROX Labs · Bratislava</text>
+    <rect x="120" y="270" width="1000" height="2" fill="#b8b2a6"/>
+    <text x="120" y="340" font-size="28">Bill to: Northwind Trading</text>
+    <text x="120" y="384" font-size="28">Invoice date: 14 September 2026</text>
+    <text x="120" y="428" font-size="28">Due date: 14 October 2026</text>
+    <text x="120" y="520" font-size="30" font-weight="bold">Description</text>
+    <text x="820" y="520" font-size="30" font-weight="bold">Amount</text>
+    <rect x="120" y="540" width="1000" height="1.5" fill="#b8b2a6"/>
+    <text x="120" y="596" font-size="27">Desktop licence (12 months)</text>
+    <text x="820" y="596" font-size="27">1 200.00</text>
+    <text x="120" y="644" font-size="27">Priority support</text>
+    <text x="820" y="644" font-size="27">480.00</text>
+    <text x="120" y="692" font-size="27">Onboarding workshop</text>
+    <text x="820" y="692" font-size="27">360.00</text>
+    <rect x="120" y="720" width="1000" height="1.5" fill="#b8b2a6"/>
+    <text x="640" y="780" font-size="28">Subtotal</text>
+    <text x="820" y="780" font-size="28">2 040.00</text>
+    <text x="640" y="824" font-size="28">Tax (20%)</text>
+    <text x="820" y="824" font-size="28">408.00</text>
+    <text x="640" y="884" font-size="32" font-weight="bold">Total due</text>
+    <text x="820" y="884" font-size="32" font-weight="bold">2 448.00</text>
+    <text x="120" y="1020" font-size="24" fill="#555">Payment terms: 30 days net. Thank you for your business.</text>
+    <text x="120" y="1660" font-size="20" fill="#777">Scanned copy · generated for testing</text>
+  </g>
+</svg>

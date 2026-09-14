@@ -4,10 +4,13 @@
 //! engine is bundled; PDF rendering to images requires an optional PDFium
 //! adapter that is documented in `docs/formats.md`.
 
+pub mod annotate;
 pub mod build;
 pub mod compress;
+pub mod forms;
 pub mod images;
 pub mod metadata;
+pub mod organize;
 pub mod pages;
 pub mod selection;
 pub mod watermark;

@@ -150,6 +150,7 @@ export function parseEditor(root: HTMLElement): DocModel {
   const blocks: DocBlock[] = [];
   const items: { element: HTMLElement; list: "bullet" | "numbered" | null }[] = [];
   for (const child of Array.from(root.children)) {
+    if ((child as HTMLElement).dataset.pageBreak !== undefined) continue;
     const tag = child.tagName.toLowerCase();
     if (tag === "ul" || tag === "ol") {
       for (const item of Array.from(child.children)) {
@@ -207,10 +208,6 @@ function blockHtml(block: DocBlock): string {
       return `<h2${align}>${inner || "<br>"}</h2>`;
     case "heading3":
       return `<h3${align}>${inner || "<br>"}</h3>`;
-    case "bullet":
-      return `<ul><li${align}>${inner || "<br>"}</li></ul>`;
-    case "numbered":
-      return `<ol><li${align}>${inner || "<br>"}</li></ol>`;
     case "quote":
       return `<blockquote${align}>${inner || "<br>"}</blockquote>`;
     default:
@@ -219,7 +216,26 @@ function blockHtml(block: DocBlock): string {
 }
 
 export function modelToHtml(model: DocModel): string {
-  return model.blocks.map(blockHtml).join("");
+  const parts: string[] = [];
+  let index = 0;
+  while (index < model.blocks.length) {
+    const block = model.blocks[index];
+    if (block.kind === "bullet" || block.kind === "numbered") {
+      const tag = block.kind === "bullet" ? "ul" : "ol";
+      const items: string[] = [];
+      while (index < model.blocks.length && model.blocks[index].kind === block.kind) {
+        const current = model.blocks[index];
+        const align = current.align ? ` style="text-align:${current.align}"` : "";
+        items.push(`<li${align}>${current.runs.map(runHtml).join("") || "<br>"}</li>`);
+        index += 1;
+      }
+      parts.push(`<${tag}>${items.join("")}</${tag}>`);
+      continue;
+    }
+    parts.push(blockHtml(block));
+    index += 1;
+  }
+  return parts.join("");
 }
 
 export function documentWordCount(root: HTMLElement): number {

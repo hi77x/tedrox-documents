@@ -1,356 +1,427 @@
-import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWebview } from "@tauri-apps/api/webview";
-import { open } from "@tauri-apps/plugin-dialog";
-import DocumentEditor from "./DocumentEditor";
-import SpreadsheetEditor from "./SpreadsheetEditor";
-import { CONVERT_TOOLS, IMAGE_TOOLS, PDF_TOOLS, ToolsPage } from "./ToolsPage";
-import { DocModel, emptyDocument } from "./docModel";
-import { WorkbookModel } from "./sheetModel";
-import { runOperation } from "./api";
-import { Language, detectLanguage, setLanguage, t } from "./i18n";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AppStateProvider, useStore, type Tab, type TabKind } from "./state";
+import { classify, fileName } from "./platform";
+import { CommandPalette, JobCenter, TabStrip, Toasts, TopBar, type Command } from "./shell/Chrome";
+import { HomeView } from "./workspaces/HomeView";
+import { SettingsView } from "./workspaces/SettingsView";
+import { PdfWorkspace } from "./workspaces/pdf/PdfWorkspace";
+import { WriterWorkspace } from "./workspaces/WriterWorkspace";
+import { SheetsWorkspace } from "./workspaces/SheetsWorkspace";
+import { ConvertWorkspace } from "./workspaces/ConvertWorkspace";
+import { emptyDocument, type DocModel } from "./docModel";
+import { emptyWorkbook, workbookFromModel, type Workbook } from "./sheetModel";
+import "./design/tokens.css";
 
-type View = "home" | "doc" | "sheet" | "pdf" | "images" | "convert" | "settings";
-type Recent = { path: string; kind: "doc" | "sheet"; at: number };
+type Payload =
+  | { kind: "document"; model: DocModel | null; error?: string }
+  | { kind: "sheet"; workbook: Workbook | null; error?: string };
 
-const RECENT_KEY = "tdx-recent";
+export function Shell() {
+  const {
+    platform,
+    tabs,
+    activeId,
+    openTab,
+    closeTab,
+    activateTab,
+    updateTab,
+    settings,
+    pushToast,
+    runJob,
+  } = useStore();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [jobsOpen, setJobsOpen] = useState(false);
+  const [payloads, setPayloads] = useState<Record<string, Payload>>({});
+  const payloadsRef = useRef(payloads);
+  payloadsRef.current = payloads;
+  const inFlight = useRef(new Set<string>());
 
-function fileName(path: string): string {
-  return path.split(/[\\/]/).pop() ?? path;
-}
-
-export default function App() {
-  const [language, setLanguageState] = useState<Language>(() => detectLanguage());
-  const [theme, setTheme] = useState<"system" | "light" | "dark">("system");
-  const [view, setView] = useState<View>("home");
-  const [docState, setDocState] = useState<{
-    key: number;
-    path: string | null;
-    model: DocModel;
-    name: string;
-  } | null>(null);
-  const [sheetState, setSheetState] = useState<{
-    key: number;
-    path: string | null;
-    workbook: WorkbookModel;
-    name: string;
-  } | null>(null);
-  const [recent, setRecent] = useState<Recent[]>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
-      return Array.isArray(stored) ? stored : [];
-    } catch {
-      return [];
-    }
-  });
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setLanguage(language);
-  }, [language]);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
-  const remember = (path: string, kind: "doc" | "sheet") => {
-    setRecent((previous) => {
-      const next = [{ path, kind, at: Date.now() }, ...previous.filter((item) => item.path !== path)].slice(0, 12);
-      localStorage.setItem(RECENT_KEY, JSON.stringify(next));
-      return next;
-    });
-  };
-
-  const newDocument = () => {
-    setDocState({ key: Date.now(), path: null, model: emptyDocument(), name: t("doc.untitled") });
-    setView("doc");
-  };
-
-  const newSpreadsheet = () => {
-    setSheetState({
-      key: Date.now(),
-      path: null,
-      workbook: { sheets: [{ name: "Sheet1", cells: [] }] },
-      name: t("sheet.untitled"),
-    });
-    setView("sheet");
-  };
-
-  const openPath = async (path: string) => {
-    const lower = path.toLowerCase();
-    setError(null);
-    try {
-      if (lower.endsWith(".docx")) {
-        const model = await invoke<DocModel>("docx_open", { path });
-        setDocState({
-          key: Date.now(),
-          path,
-          model,
-          name: model.title ?? fileName(path),
-        });
-        setView("doc");
-        remember(path, "doc");
-      } else if (/\.(xlsx|csv|tsv|ods)$/.test(lower)) {
-        const workbook = await invoke<WorkbookModel>("sheet_open", { path });
-        setSheetState({ key: Date.now(), path, workbook, name: fileName(path) });
-        setView("sheet");
-        remember(path, "sheet");
-      } else if (lower.endsWith(".md") || lower.endsWith(".txt")) {
-        const output = path.replace(/\.(md|txt)$/i, "") + ".imported.docx";
-        await runOperation({
-          command: "convert_auto",
-          args: { file: path, output },
-          onProgress: () => {},
-        });
-        const model = await invoke<DocModel>("docx_open", { path: output });
-        setDocState({ key: Date.now(), path: output, model, name: fileName(output) });
-        setView("doc");
-        remember(output, "doc");
-      } else {
-        setError(t("app.unsupported"));
+  const loadPayload = useCallback(
+    async (id: string, kind: TabKind, path: string) => {
+      if (kind === "document") {
+        try {
+          const model = await platform.invoke<DocModel>("docx_open", { path });
+          setPayloads((current) => ({ ...current, [id]: { kind: "document", model } }));
+        } catch (error) {
+          setPayloads((current) => ({ ...current, [id]: { kind: "document", model: null, error: String(error) } }));
+          pushToast({ kind: "error", message: "Cannot open the document", detail: String(error) });
+        }
+      } else if (kind === "sheet") {
+        try {
+          const raw = await platform.invoke<Parameters<typeof workbookFromModel>[0]>("sheet_open", { path });
+          const workbook = workbookFromModel(raw);
+          setPayloads((current) => ({ ...current, [id]: { kind: "sheet", workbook } }));
+        } catch (error) {
+          setPayloads((current) => ({ ...current, [id]: { kind: "sheet", workbook: null, error: String(error) } }));
+          pushToast({ kind: "error", message: "Cannot open the spreadsheet", detail: String(error) });
+        }
       }
-    } catch (err) {
-      setError(String(err));
-    }
-  };
+    },
+    [platform, pushToast],
+  );
 
-  const openDialog = async () => {
-    const selection = await open({
-      multiple: false,
-      title: t("app.openFile"),
-      filters: [
-        {
-          name: t("app.documentsAndSheets"),
-          extensions: ["docx", "xlsx", "csv", "tsv", "ods", "md", "txt"],
-        },
+  const ensurePayload = useCallback(
+    (id: string, kind: TabKind, path: string | null) => {
+      if (!path || (kind !== "document" && kind !== "sheet")) return;
+      if (payloadsRef.current[id]) return;
+      if (inFlight.current.has(id)) return;
+      inFlight.current.add(id);
+      void loadPayload(id, kind, path).finally(() => inFlight.current.delete(id));
+    },
+    [loadPayload],
+  );
+
+  useEffect(() => {
+    for (const tab of tabs) {
+      if (tab.path && (tab.kind === "document" || tab.kind === "sheet")) {
+        ensurePayload(tab.id, tab.kind, tab.path);
+      }
+    }
+  }, [ensurePayload, tabs]);
+
+  const tabId = useCallback(
+    (kind: TabKind, path: string | null, title: string) =>
+      openTab({ kind, title, path }),
+    [openTab],
+  );
+
+  const importAsDocument = useCallback(
+    async (path: string, payloadId: string) => {
+      try {
+        const output = await platform.suggestOutput(path, "imported", "docx");
+        await runJob(
+          "Import document",
+          fileName(path),
+          "doc_from_markdown",
+          { file: path, output, title: fileName(path).replace(/\.[^.]+$/, "") },
+          { quiet: true },
+        );
+        await loadPayload(payloadId, "document", output);
+        updateTab(payloadId, { path: output });
+      } catch (error) {
+        pushToast({ kind: "error", message: "Import failed", detail: String(error) });
+      }
+    },
+    [loadPayload, platform, pushToast, runJob, updateTab],
+  );
+
+  const openPath = useCallback(
+    (path: string) => {
+      const kind = classify(path);
+      if (kind === "pdf") {
+        const id = tabId("pdf", path, fileName(path));
+        ensurePayload(id, "pdf", path);
+        return;
+      }
+      if (kind === "sheet") {
+        const id = tabId("sheet", path, fileName(path));
+        ensurePayload(id, "sheet", path);
+        return;
+      }
+      if (kind === "image") {
+        openTab({ kind: "images", title: "Images", path: null });
+        return;
+      }
+      if (kind === "document") {
+        const id = tabId("document", path, fileName(path));
+        if (path.toLowerCase().endsWith(".docx")) {
+          ensurePayload(id, "document", path);
+        } else {
+          void importAsDocument(path, id);
+        }
+        return;
+      }
+      openTab({ kind: "convert", title: "Convert", path: null });
+    },
+    [ensurePayload, importAsDocument, openTab, tabId],
+  );
+
+  const openFiles = useCallback(async () => {
+    const picked = await platform.openPaths({
+      multiple: true,
+      title: "Open file",
+      extensions: [
+        "docx", "doc", "odt", "rtf", "xlsx", "csv", "tsv", "ods", "pdf", "md", "txt", "html",
+        "png", "jpg", "jpeg", "webp", "bmp", "tiff", "avif", "svg",
       ],
     });
-    if (!selection) return;
-    await openPath(Array.isArray(selection) ? selection[0] : selection);
-  };
+    if (!picked) return;
+    for (const path of picked) openPath(path);
+  }, [openPath, platform]);
+
+  const newDocument = useCallback(() => {
+    const id = openTab({ kind: "document", title: "Untitled document", path: null });
+    setPayloads((current) => ({ ...current, [id]: { kind: "document", model: emptyDocument() } }));
+  }, [openTab]);
+
+  const newSpreadsheet = useCallback(() => {
+    const id = openTab({ kind: "sheet", title: "Untitled spreadsheet", path: null });
+    setPayloads((current) => ({ ...current, [id]: { kind: "sheet", workbook: emptyWorkbook() } }));
+  }, [openTab]);
+
+  const openHome = useCallback(() => {
+    const home = tabs.find((tab) => tab.kind === "home");
+    if (home) activateTab(home.id);
+    else openTab({ kind: "home", title: "Home", path: null });
+  }, [activateTab, openTab, tabs]);
+
+  const commands: Command[] = useMemo(() => {
+    const list: Command[] = [
+      { id: "file.open", title: "Open file…", group: "File", shortcut: "Ctrl O", run: openFiles },
+      { id: "file.new.document", title: "New document", group: "File", shortcut: "Ctrl N", run: newDocument },
+      { id: "file.new.sheet", title: "New spreadsheet", group: "File", run: newSpreadsheet },
+      { id: "nav.home", title: "Go to Home", group: "Navigate", run: openHome },
+      { id: "nav.pdf", title: "Open the PDF workspace", group: "Navigate", run: () => openTab({ kind: "pdf", title: "PDF", path: null }) },
+      { id: "nav.convert", title: "Open Convert", group: "Navigate", run: () => openTab({ kind: "convert", title: "Convert", path: null }) },
+      { id: "nav.images", title: "Open Images", group: "Navigate", run: () => openTab({ kind: "images", title: "Images", path: null }) },
+      { id: "tab.close", title: "Close the current tab", group: "View", shortcut: "Ctrl W", run: () => closeTab(activeId) },
+    ];
+    if (activeId.startsWith("document")) {
+      list.push({
+        id: "doc.export",
+        title: "Export the document to PDF",
+        group: "Document",
+        run: async () => {
+          const tab = tabs.find((item) => item.id === activeId);
+          if (!tab?.path) {
+            pushToast({ kind: "warn", message: "Save the document first" });
+            return;
+          }
+          const suggested = await platform.suggestOutput(tab.path, "export", "pdf");
+          const target = await platform.savePath(suggested, "pdf", "PDF");
+          if (!target) return;
+          await runJob("Export PDF", fileName(target), "convert_auto", { file: tab.path, output: target });
+        },
+      });
+    }
+    for (const tab of tabs) {
+      if (!tab.path) continue;
+      list.push({
+        id: `open.${tab.id}`,
+        title: `Switch to ${tab.title}`,
+        group: "Open files",
+        run: () => activateTab(tab.id),
+      });
+    }
+    return list;
+  }, [
+    activateTab,
+    activeId,
+    closeTab,
+    newDocument,
+    newSpreadsheet,
+    openFiles,
+    openHome,
+    openTab,
+    platform,
+    pushToast,
+    runJob,
+    tabs,
+  ]);
 
   useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    getCurrentWebview()
-      .onDragDropEvent((event) => {
-        if (event.payload.type === "drop" && event.payload.paths.length > 0) {
-          void openPath(event.payload.paths[0]);
-        }
-      })
-      .then((fn) => {
-        unlisten = fn;
-      })
-      .catch(() => {});
-    return () => {
-      if (unlisten) unlisten();
+    const handler = (event: KeyboardEvent) => {
+      const meta = event.ctrlKey || event.metaKey;
+      if (!meta) return;
+      const key = event.key.toLowerCase();
+      if (key === "k") {
+        event.preventDefault();
+        setPaletteOpen(true);
+      }
+      if (key === "o") {
+        event.preventDefault();
+        void openFiles();
+      }
+      if (key === "n") {
+        event.preventDefault();
+        newDocument();
+      }
+      if (key === "w") {
+        event.preventDefault();
+        closeTab(activeId);
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [activeId, closeTab, newDocument, openFiles]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
-    import("@tauri-apps/api/event")
-      .then(({ listen }) =>
-        listen<string>("open-file", (event) => {
-          if (event.payload) void openPath(event.payload);
+    void import("@tauri-apps/api/webview")
+      .then(({ getCurrentWebview }) =>
+        getCurrentWebview().onDragDropEvent((event) => {
+          if (event.payload.type === "drop" && event.payload.paths.length > 0) {
+            for (const path of event.payload.paths) openPath(path);
+          }
         }),
       )
       .then((fn) => {
         unlisten = fn;
       })
-      .catch(() => {});
-    return () => {
-      if (unlisten) unlisten();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      .catch(() => undefined);
+    return () => unlisten?.();
+  }, [openPath]);
 
-  const navItems: { id: View; label: string }[] = [
-    { id: "home", label: t("nav.home") },
-    { id: "doc", label: t("nav.document") },
-    { id: "sheet", label: t("nav.spreadsheet") },
-    { id: "pdf", label: "PDF" },
-    { id: "images", label: t("nav.images") },
-    { id: "convert", label: t("nav.convert") },
-    { id: "settings", label: t("nav.settings") },
-  ];
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    void import("@tauri-apps/api/event")
+      .then(({ listen }) =>
+        listen<string>("open-file", (event) => {
+          if (event.payload) openPath(event.payload);
+        }),
+      )
+      .then((fn) => {
+        unlisten = fn;
+      })
+      .catch(() => undefined);
+    return () => unlisten?.();
+  }, [openPath]);
+
+  const themeClass = settings.theme;
 
   return (
-    <div className="app">
-      <aside className="sidebar">
-        <div className="brand">
-          <img src="icon.svg" alt="" width="26" height="26" />
-          <span>TEDROX Documents</span>
-        </div>
-        <nav>
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={view === item.id ? "nav-item active" : "nav-item"}
-              onClick={() => {
-                if (item.id === "doc" && !docState) {
-                  newDocument();
-                  return;
-                }
-                if (item.id === "sheet" && !sheetState) {
-                  newSpreadsheet();
-                  return;
-                }
-                setView(item.id);
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-        <p className="privacy-badge">{t("hero.trust.local")}</p>
-      </aside>
+    <div className={`app-shell theme-${themeClass}`}>
+      <TopBar
+        onCommandPalette={() => setPaletteOpen(true)}
+        onJobs={() => setJobsOpen((value) => !value)}
+        jobsOpen={jobsOpen}
+        onSettings={() => openTab({ kind: "settings", title: "Settings", path: null })}
+      />
+      <TabStrip onNewTab={newDocument} />
 
-      <main className="content">
-        {view === "home" && (
-          <section className="page">
-            <h1>{t("app.homeTitle")}</h1>
-            <p className="lede">{t("app.homeSubtitle")}</p>
+      <div style={{ position: "relative", minHeight: 0, overflow: "hidden" }}>
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: tab.id === activeId ? "block" : "none",
+              minHeight: 0,
+            }}
+          >
+            <TabBody
+              tab={tab}
+              payload={payloads[tab.id]}
+              onOpenPath={openPath}
+              onOpenFiles={openFiles}
+              onNewDocument={newDocument}
+              onNewSpreadsheet={newSpreadsheet}
+              onOpenTab={(kind) => openTab({ kind, title: titleFor(kind), path: null })}
+            />
+          </div>
+        ))}
+      </div>
 
-            <div className="start-grid">
-              <button className="start-card" onClick={newDocument}>
-                <span className="start-icon" aria-hidden>
-                  <svg viewBox="0 0 24 24" width="26" height="26">
-                    <path
-                      d="M6 2h8l4 4v16H6z"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinejoin="round"
-                    />
-                    <path d="M9 12h6M9 15h6M9 9h3" stroke="currentColor" strokeWidth="1.4" />
-                  </svg>
-                </span>
-                <strong>{t("app.newDoc")}</strong>
-                <span className="muted">{t("app.newDocDesc")}</span>
-              </button>
-              <button className="start-card" onClick={newSpreadsheet}>
-                <span className="start-icon" aria-hidden>
-                  <svg viewBox="0 0 24 24" width="26" height="26">
-                    <rect x="3" y="4" width="18" height="16" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                    <path d="M3 9h18M3 14h18M9 4v16M15 4v16" stroke="currentColor" strokeWidth="1.2" />
-                  </svg>
-                </span>
-                <strong>{t("app.newSheet")}</strong>
-                <span className="muted">{t("app.newSheetDesc")}</span>
-              </button>
-              <button className="start-card" onClick={openDialog}>
-                <span className="start-icon" aria-hidden>
-                  <svg viewBox="0 0 24 24" width="26" height="26">
-                    <path
-                      d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-                <strong>{t("app.openFile")}</strong>
-                <span className="muted">{t("app.openFileDesc")}</span>
-              </button>
-            </div>
-
-            <div className="panel">
-              <h2>{t("app.recent")}</h2>
-              {recent.length === 0 && <p className="muted">{t("app.recentEmpty")}</p>}
-              <ul className="recent-list">
-                {recent.map((item) => (
-                  <li key={item.path}>
-                    <button className="link" onClick={() => openPath(item.path)}>
-                      <span className="recent-kind">{item.kind === "doc" ? "DOCX" : "XLSX"}</span>
-                      <span className="truncate">{fileName(item.path)}</span>
-                    </button>
-                    <span className="muted small truncate">{item.path}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="panel">
-              <h2>{t("app.extraTools")}</h2>
-              <div className="chip-row">
-                <button className="chip-btn" onClick={() => setView("pdf")}>
-                  {t("pdf.title")}
-                </button>
-                <button className="chip-btn" onClick={() => setView("images")}>
-                  {t("images.title")}
-                </button>
-                <button className="chip-btn" onClick={() => setView("convert")}>
-                  {t("convert.title")}
-                </button>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {view === "doc" && docState && (
-          <DocumentEditor
-            key={docState.key}
-            path={docState.path}
-            model={docState.model}
-            displayName={docState.name}
-            onSaved={remember}
-          />
-        )}
-
-        {view === "sheet" && sheetState && (
-          <SpreadsheetEditor
-            key={sheetState.key}
-            path={sheetState.path}
-            workbook={sheetState.workbook}
-            displayName={sheetState.name}
-            onSaved={remember}
-          />
-        )}
-
-        {view === "pdf" && <ToolsPage tools={PDF_TOOLS} titleKey="pdf.title" descKey="tools.pdfDesc" />}
-        {view === "images" && (
-          <ToolsPage tools={IMAGE_TOOLS} titleKey="images.title" descKey="tools.imagesDesc" />
-        )}
-        {view === "convert" && (
-          <ToolsPage tools={CONVERT_TOOLS} titleKey="convert.title" descKey="convert.desc" />
-        )}
-
-        {view === "settings" && (
-          <section className="page">
-            <h1>{t("settings.title")}</h1>
-            <div className="panel fields">
-              <label>
-                <span>{t("settings.language")}</span>
-                <select value={language} onChange={(event) => setLanguageState(event.target.value as Language)}>
-                  <option value="en">English</option>
-                  <option value="ru">Русский</option>
-                </select>
-              </label>
-              <label>
-                <span>{t("settings.theme")}</span>
-                <select value={theme} onChange={(event) => setTheme(event.target.value as typeof theme)}>
-                  <option value="system">{t("settings.theme.system")}</option>
-                  <option value="light">{t("settings.theme.light")}</option>
-                  <option value="dark">{t("settings.theme.dark")}</option>
-                </select>
-              </label>
-            </div>
-            <div className="panel">
-              <h2>{t("settings.about")}</h2>
-              <p>{t("settings.version")}: 0.2.0 · MIT · space.tedrox.documents</p>
-              <p className="muted">{t("settings.privacyNote")}</p>
-            </div>
-          </section>
-        )}
-      </main>
-
-      {error && (
-        <div className="alert error floating" onClick={() => setError(null)}>
-          {error}
-        </div>
-      )}
+      {paletteOpen && <CommandPalette commands={commands} onClose={() => setPaletteOpen(false)} />}
+      {jobsOpen && <JobCenter onClose={() => setJobsOpen(false)} />}
+      <Toasts />
     </div>
+  );
+}
+
+function titleFor(kind: TabKind): string {
+  switch (kind) {
+    case "pdf":
+      return "PDF";
+    case "convert":
+      return "Convert";
+    case "images":
+      return "Images";
+    case "settings":
+      return "Settings";
+    case "sheet":
+      return "Spreadsheet";
+    case "document":
+      return "Document";
+    default:
+      return "Home";
+  }
+}
+
+function TabBody({
+  tab,
+  payload,
+  onOpenPath,
+  onOpenFiles,
+  onNewDocument,
+  onNewSpreadsheet,
+  onOpenTab,
+}: {
+  tab: Tab;
+  payload: Payload | undefined;
+  onOpenPath: (path: string) => void;
+  onOpenFiles: () => void;
+  onNewDocument: () => void;
+  onNewSpreadsheet: () => void;
+  onOpenTab: (kind: "pdf" | "convert" | "images") => void;
+}) {
+  const { updateTab } = useStore();
+
+  if (tab.kind === "home") {
+    return (
+      <HomeView
+        onOpenFiles={onOpenFiles}
+        onNewDocument={onNewDocument}
+        onNewSpreadsheet={onNewSpreadsheet}
+        onOpenPath={onOpenPath}
+        onOpenTab={onOpenTab}
+      />
+    );
+  }
+  if (tab.kind === "settings") return <SettingsView />;
+  if (tab.kind === "pdf") {
+    return <PdfWorkspace path={tab.path} tabId={tab.id} />;
+  }
+  if (tab.kind === "convert") return <ConvertWorkspace mode="convert" />;
+  if (tab.kind === "images") return <ConvertWorkspace mode="images" />;
+
+  if (tab.kind === "document") {
+    if (!payload) {
+      return (
+        <div className="empty-state">
+          <h2>Opening…</h2>
+          <p>{tab.path ?? tab.title}</p>
+        </div>
+      );
+    }
+    if (payload.kind === "document" && payload.model) {
+      return (
+        <WriterWorkspace tabId={tab.id} path={tab.path} model={payload.model} displayName={tab.title} />
+      );
+    }
+    return (
+      <div className="empty-state">
+        <h2>Could not open this document</h2>
+        <p>{payload.error ?? "Unknown error"}</p>
+        <button className="btn" onClick={() => updateTab(tab.id, { dirty: false })}>
+          Continue without the file
+        </button>
+      </div>
+    );
+  }
+
+  if (tab.kind === "sheet") {
+    if (!payload || payload.kind !== "sheet" || !payload.workbook) {
+      return (
+        <div className="empty-state">
+          <h2>{payload?.error ? "Could not open this spreadsheet" : "Opening…"}</h2>
+          <p>{payload?.error ?? tab.path ?? tab.title}</p>
+        </div>
+      );
+    }
+    return (
+      <SheetsWorkspace tabId={tab.id} path={tab.path} workbook={payload.workbook} displayName={tab.title} />
+    );
+  }
+
+  return null;
+}
+
+export default function App() {
+  return (
+    <AppStateProvider>
+      <Shell />
+    </AppStateProvider>
   );
 }

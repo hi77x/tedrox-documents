@@ -1,0 +1,18 @@
+{
+  "name": "tedrox-documents",
+  "private": true,
+  "version": "0.3.0",
+  "description": "Local-first office suite: writer, spreadsheet, PDF and conversion tools.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "hygiene": "node scripts/check-repo-hygiene.mjs",
+    "i18n": "node scripts/sync-i18n.mjs",
+    "licenses": "node scripts/license-audit.mjs",
+    "screenshots": "node scripts/capture-screenshots.mjs",
+    "test": "npm --prefix apps/desktop run test"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.49.1"
+  }
+}
