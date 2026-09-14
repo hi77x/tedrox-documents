@@ -34,6 +34,7 @@ const SCENES = [
   { name: "document-dark", scene: "writer", width: 1440, height: 900, theme: "dark" },
   { name: "pdf-view-dark", scene: "pdf-view", width: 1440, height: 900, theme: "dark" },
   { name: "hero", scene: "writer", width: 1600, height: 1000, theme: "light" },
+  { name: "og", scene: "pdf-view", width: 1200, height: 630, theme: "light" },
   { name: "mobile-pdf", scene: "pdf-view", width: 420, height: 880, theme: "light" },
 ];
 
