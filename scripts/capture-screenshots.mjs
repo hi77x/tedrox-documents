@@ -52,8 +52,11 @@ async function waitForServer(attempts = 80) {
 }
 
 async function main() {
-  await rm(output, { recursive: true, force: true });
   await mkdir(output, { recursive: true });
+  // Only clear the images this script owns; the web verification writes its own.
+  for (const item of SCENES) {
+    await rm(join(output, `${item.name}.png`), { force: true });
+  }
 
   const viteBin = join(app, "node_modules", "vite", "bin", "vite.js");
   const server = spawn(
