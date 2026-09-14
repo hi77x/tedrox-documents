@@ -108,17 +108,27 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: apps/web-app/package-lock.json
-      - name: Install
+          cache-dependency-path: |
+            package-lock.json
+            apps/web-app/package-lock.json
+      - name: Install tooling
+        run: npm ci --no-fund --no-audit
+      - name: Install application
         working-directory: apps/web-app
         run: npm ci --no-fund --no-audit
+      - name: Install Chromium
+        run: npx playwright-core install --with-deps chromium
       - name: Typecheck and build
         working-directory: apps/web-app
         run: npm run build
+      - name: Verify in a headless browser
+        run: npm run verify:web
       - uses: actions/upload-artifact@v4
         with:
           name: web-app
-          path: apps/web-app/dist
+          path: |
+            apps/web-app/dist
+            assets/screenshots/web-*.png
           retention-days: 14
 
   screenshots:

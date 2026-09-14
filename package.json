@@ -10,7 +10,8 @@
     "i18n": "node scripts/sync-i18n.mjs",
     "licenses": "node scripts/license-audit.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs",
-    "test": "npm --prefix apps/desktop run test"
+    "test": "npm --prefix apps/desktop run test",
+    "verify:web": "node scripts/verify-web-app.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.49.1"
