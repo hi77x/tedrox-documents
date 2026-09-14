@@ -110,8 +110,12 @@ jobs:
           cache: npm
           cache-dependency-path: |
             package-lock.json
+            apps/desktop/package-lock.json
             apps/web-app/package-lock.json
       - name: Install tooling
+        run: npm ci --no-fund --no-audit
+      - name: Install shared UI dependencies
+        working-directory: apps/desktop
         run: npm ci --no-fund --no-audit
       - name: Install application
         working-directory: apps/web-app
