@@ -101,7 +101,12 @@ export function PdfWorkspace({ path, tabId }: { path: string | null; tabId: stri
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("view");
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(() => {
+    if (typeof window === "undefined") return 1;
+    if (window.innerWidth < 560) return 0.5;
+    if (window.innerWidth < 900) return 0.75;
+    return 1;
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [plan, setPlan] = useState<PlanEntry[]>([]);

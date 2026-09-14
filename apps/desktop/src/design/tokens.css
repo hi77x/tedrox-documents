@@ -1589,3 +1589,106 @@ textarea {
 .spacer { flex: 1; }
 .scroll-y { overflow-y: auto; min-height: 0; }
 .hidden { display: none; }
+
+/* ---------- compact layout ---------- */
+
+@media (max-width: 900px) {
+  .titlebar {
+    gap: 6px;
+    padding: 0 6px;
+  }
+
+  .titlebar .btn.ghost span:not(.mono) {
+    display: none;
+  }
+
+  .tabstrip {
+    height: 32px;
+  }
+
+  .tab {
+    min-width: 96px;
+    max-width: 160px;
+  }
+
+  .home {
+    padding: 18px 16px 40px;
+  }
+
+  .home h1 {
+    font-size: 21px;
+  }
+
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .template-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Panels become full-width: the canvas keeps the whole viewport. */
+  .workspace-body.with-left,
+  .workspace-body.with-left.with-right,
+  .workspace-body.with-right {
+    grid-template-columns: 1fr;
+  }
+
+  .side-panel,
+  .inspector {
+    display: none;
+  }
+
+  .ribbon {
+    min-height: 40px;
+    padding: 4px 6px;
+  }
+
+  .pdf-tool-strip {
+    gap: 4px;
+    padding: 5px 6px;
+  }
+
+  .writer-canvas {
+    padding: 10px 0 40px;
+    align-items: flex-start;
+  }
+
+  .statusbar {
+    gap: 8px;
+    overflow-x: auto;
+  }
+
+  .toast-stack {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+    bottom: 36px;
+  }
+
+  .popover {
+    right: 6px;
+    left: 6px;
+    min-width: 0;
+  }
+
+  .overlay {
+    padding-top: 6vh;
+  }
+}
+
+@media (max-width: 620px) {
+  .brand span {
+    display: none;
+  }
+
+  .sheet-tabs {
+    overflow-x: auto;
+  }
+
+  .page-grid {
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    gap: 10px;
+    padding: 12px;
+  }
+}

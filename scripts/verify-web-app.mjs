@@ -75,6 +75,14 @@ async function main() {
     if (cells === 0) failures.push("the spreadsheet workspace did not render");
     await page.screenshot({ path: join(output, "web-sheet.png"), animations: "disabled" });
 
+    // Narrow viewport: the compact layout must keep the workspace usable.
+    await page.setViewportSize({ width: 414, height: 896 });
+    await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".app-shell", { timeout: 20000 });
+    const sidebarVisible = await page.locator(".side-panel").first().isVisible().catch(() => false);
+    if (sidebarVisible) failures.push("the compact layout still shows the side panel");
+    await page.screenshot({ path: join(output, "web-mobile.png"), animations: "disabled" });
+
     await context.close();
   } finally {
     if (browser) await browser.close();

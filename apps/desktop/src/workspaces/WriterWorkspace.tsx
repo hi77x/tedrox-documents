@@ -40,11 +40,19 @@ const PAGE_MARGIN_Y = 76;
 const PAGE_MARGIN_X = 84;
 const PAGE_CONTENT_HEIGHT = PAGE_HEIGHT - PAGE_MARGIN_Y * 2;
 
+/** Narrow windows start zoomed out so the page fits without horizontal scrolling. */
+function initialZoom(): number {
+  if (typeof window === "undefined") return 1;
+  if (window.innerWidth < 560) return 0.45;
+  if (window.innerWidth < 900) return 0.65;
+  return 1;
+}
+
 export function WriterWorkspace({ tabId, path, model, displayName }: Props) {
   const { platform, runJob, updateTab, remember, pushToast, settings } = useStore();
   const editor = useRef<HTMLDivElement>(null);
   const [dirty, setDirty] = useState(false);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(() => initialZoom());
   const [pageCount, setPageCount] = useState(1);
   const [stats, setStats] = useState({ words: 0, characters: 0 });
   const [findOpen, setFindOpen] = useState(false);
@@ -446,7 +454,7 @@ export function WriterWorkspace({ tabId, path, model, displayName }: Props) {
         <span className="sep" />
         <span>{wordLabel}</span>
         <span className="spacer" />
-        <button className="icon-btn" onClick={() => setZoom((value) => Math.max(0.5, value - 0.1))} title="Zoom out">
+        <button className="icon-btn" onClick={() => setZoom((value) => Math.max(0.35, value - 0.1))} title="Zoom out">
           <IconZoomOut />
         </button>
         <span>{Math.round(zoom * 100)}%</span>

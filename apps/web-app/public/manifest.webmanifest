@@ -1,0 +1,18 @@
+{
+  "name": "TEDROX Documents",
+  "short_name": "TEDROX",
+  "description": "Open, organize and annotate PDFs, edit spreadsheets and documents — locally in the browser.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101317",
+  "theme_color": "#2f66d6",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
