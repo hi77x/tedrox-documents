@@ -143,12 +143,23 @@ macros. The engine never executes document scripts or Office macros.
 Grab the latest build from [GitHub Releases](https://github.com/hi77x/tedrox-documents/releases):
 
 - **Windows desktop app** — NSIS installer with a Start menu entry
+- **Linux desktop app** — AppImage and `.deb` packages
 - **Windows CLI** — portable `tdx-doc.exe`
 - **Linux CLI** — `tdx-doc-linux-x86_64.tar.gz`
+- **Web application** — build `apps/web-app` and serve the bundle, or use the
+  hosted demo once it is published
 - **Source** — build it yourself, see below
 
 Every release includes `SHA256SUMS.txt`. Code signing is not configured yet, so
 Windows SmartScreen may warn on first run.
+
+## Web application
+
+The same interface runs in a browser (`apps/web-app`). It reads files with the
+File API, performs PDF page operations with `pdf-lib`, evaluates spreadsheets
+with the shared formula engine and installs as an offline PWA. Operations that
+need the Rust engine say so instead of failing silently — see
+[docs/web.md](docs/web.md) for the exact split.
 
 ## Build from source
 
